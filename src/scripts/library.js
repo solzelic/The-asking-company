@@ -168,21 +168,13 @@ function apply(animate = true){
   writeURL();
 }
 
-/* active filters as pills; the Filter button wears a count */
-const shelfName = id => (document.querySelector(`[data-shelf="${id}"] span`)?.textContent || id);
+/* the count, and a way back */
 function renderActive(shown){
-  const pills = [];
-  if (S.shelf !== 'all') pills.push({ k: 'shelf', v: S.shelf, lab: 'Shelf', txt: shelfName(S.shelf) });
-  S.tags.forEach(t => pills.push({ k: 'tag', v: t, lab: 'Topic', txt: t }));
-  if (!S.planned) pills.push({ k: 'planned', v: '', lab: '', txt: 'Written only' });
-  const nFilters = (S.shelf !== 'all' ? 1 : 0) + S.tags.size + (S.planned ? 0 : 1);
-  const badge = $('filterBadge'); badge.hidden = !nFilters; badge.textContent = nFilters;
-  const act = $('active');
-  const filtered = S.q || S.voice !== 'all' || nFilters;
-  act.hidden = !pills.length && !filtered;
-  act.innerHTML = pills.map(p => `<button type="button" class="pill" data-rm="${p.k}" data-val="${esc(p.v)}">${p.lab ? '<i>' + p.lab + '</i>' : ''}${esc(p.txt)}<b>×</b></button>`).join('') +
-    `<span class="count">${filtered ? `${shown} of ${real.length}` : `${real.length} ${real.length === 1 ? 'volume' : 'volumes'}`}</span>`;
+  const filtered = S.q || S.voice !== 'all' || S.shelf !== 'all' || S.tags.size || !S.planned;
+  $('count').innerHTML = (filtered ? `${shown} of ${real.length}` : `${real.length} ${real.length === 1 ? 'volume' : 'volumes'}`) +
+    (filtered ? ' <button type="button" id="clear">Clear</button>' : '');
 }
+
 const g$ = sel => document.querySelector(sel);
 
 /* ── controls ── */
@@ -233,26 +225,16 @@ function renderResults(q){
     }).join('') : '';
 }
 const slugOf2 = u => (u.split('?')[0].split('#')[0].replace(/\.html$/, '').replace(/\/$/, '').split('/').pop() || '');
-const filterBtn = $('filterBtn'), filterPop = $('filterPop');
-function setPop(o){ filterPop.hidden = !o; filterBtn.setAttribute('aria-expanded', String(o)); }
 controls.addEventListener('click', e => {
   const t = e.target.closest('button');
   if (!t) return;
-  if (t.id === 'filterBtn'){ setPop(filterPop.hidden); return; }
-  if (t.id === 'clear'){ S.q = ''; S.voice = 'all'; S.shelf = 'all'; S.tags.clear(); S.planned = true; hits = null; results.innerHTML = ''; results.hidden = true; setPop(false); apply(); return; }
-  if (t.dataset.rm){
-    if (t.dataset.rm === 'shelf') S.shelf = 'all';
-    else if (t.dataset.rm === 'tag') S.tags.delete(t.dataset.val);
-    else if (t.dataset.rm === 'planned') S.planned = true;
-    apply(); return;
-  }
+  if (t.id === 'clear'){ S.q = ''; S.voice = 'all'; S.shelf = 'all'; S.tags.clear(); S.planned = true; hits = null; results.innerHTML = ''; results.hidden = true; apply(); return; }
   if (t.dataset.voice){ S.voice = t.dataset.voice; apply(); }
   else if (t.dataset.shelf){ S.shelf = t.dataset.shelf; apply(); }
   else if (t.dataset.tag){ S.tags.has(t.dataset.tag) ? S.tags.delete(t.dataset.tag) : S.tags.add(t.dataset.tag); apply(); }
   else if (t.dataset.view){ S.view = t.dataset.view; apply(false); }
 });
-document.addEventListener('click', e => { if (!filterPop.hidden && !e.target.closest('.menu-wrap')) setPop(false); });
-addEventListener('keydown', e => { if (e.key === 'Escape') setPop(false); });
+
 $('sort').addEventListener('change', e => { S.sort = e.target.value; apply(); });
 $('planned').addEventListener('change', e => { S.planned = e.target.checked; apply(); });
 
