@@ -252,7 +252,7 @@ function showCard(b){
     `<div class="body"><div class="cc-t">${esc(d.title)}</div><p class="cc-d">${esc(d.dek)}</p>` +
     (planned
       ? `<div class="cc-act"><span class="cc-meta"><span>Not yet written</span><span>${esc(seriesOf(b))}</span></span></div>`
-      : `<div class="cc-act"><span class="cc-meta"><span>${esc(d.minutes)} min</span><span>${esc(d.dateLabel)}</span>${d.company === '1' ? '<span>Company letterhead</span>' : ''}</span>` +
+      : `<div class="cc-act"><span class="cc-meta"><span>${esc(d.minutes)} min</span><span>${esc(d.dateLabel)}</span>${d.company === '1' ? '<span>On company letterhead</span>' : ''}</span>` +
         `<a class="cc-go" href="${b.getAttribute('href')}">Read</a></div>`) +
     `</div>`;
   card.setAttribute('aria-hidden', 'false');
@@ -311,9 +311,10 @@ document.addEventListener('click', e => {
 addEventListener('keydown', e => { if (e.key === 'Escape') deselect(); });
 
 /* ── opening a book ──
-   The book lifts off the shelf, flies to the centre and turns to face
-   you; the cover swings open on its hinge to show the first page; the
-   page grows until it is the screen — and the screen is the essay. */
+   Three beats. The book lifts off the shelf, comes to the centre and
+   turns to face you. The cover swings open onto blank pages. The open
+   book comes toward you until its page is the whole screen — and that
+   page is the essay's paper, so the essay simply appears on it. */
 const cssPx = (el, v) => parseFloat(getComputedStyle(el).getPropertyValue(v)) || 0;
 let opening = false;
 function open(b, e){
@@ -324,55 +325,63 @@ function open(b, e){
   opening = true;
   hideCard(true);
   const r = b.getBoundingClientRect();
-  const w = cssPx(b, '--w'), h = cssPx(b, '--h'), d = cssPx(b, '--d');
+  const w = cssPx(b, '--w'), h = cssPx(b, '--h');
+  const wrap = document.createElement('div');
+  wrap.className = 'flywrap';
+  Object.assign(wrap.style, { left: r.left + 'px', top: r.top + 'px', width: w + 'px', height: h + 'px' });
   const fly = b.cloneNode(true);
   fly.classList.remove('sel', 'nudge-l', 'nudge-r', 'enter');
   fly.classList.add('fly');
   fly.removeAttribute('href');
-  Object.assign(fly.style, { left: r.left + 'px', top: r.top + 'px', width: w + 'px', height: h + 'px' });
-  document.body.appendChild(fly);
+  Object.assign(fly.style, { width: w + 'px', height: h + 'px' });
+  wrap.appendChild(fly);
+  document.body.appendChild(wrap);
   b.style.visibility = 'hidden';
   nudge(b, false);
 
-  const inner = fly.querySelector('.bk-3d'), cover = fly.querySelector('.bk-cover');
-  const S = Math.min(innerHeight * .6, 460) / h;                  // final scale
-  const cx = innerWidth / 2 - (r.left + w / 2), cy = innerHeight / 2 - (r.top + h / 2) - 10;
-  const ease = 'cubic-bezier(.22,.8,.2,1)';
-  const startRot = getComputedStyle(inner).transform;
-  // 1. up off the shelf, out to the centre, turning to face you
+  const inner = fly.querySelector('.bk-3d'), cover = fly.querySelector('.bk-cover'), inside = fly.querySelector('.bk-inside');
+  const T = { lift: 560, open: 520, zoom: 520 };                       // the three beats
+  const S = Math.min(innerHeight * .46, 380) / h;                       // cover height on screen
+  const cx = innerWidth / 2 - (r.left + w / 2), cy = innerHeight / 2 - (r.top + h / 2);
+  const ease = 'cubic-bezier(.25,.8,.25,1)';
+
+  // 1. up off the shelf, to the centre, turning to face you
   fly.animate([
     { transform: 'translate(0,0) scale(1)' },
-    { transform: `translate(${cx * .35}px,${cy * .25 - 60}px) scale(${1 + (S - 1) * .4})`, offset: .45 },
+    { transform: `translate(${cx * .4}px,${cy * .3 - 50}px) scale(${1 + (S - 1) * .45})`, offset: .45 },
     { transform: `translate(${cx}px,${cy}px) scale(${S})` },
-  ], { duration: 640, easing: ease, fill: 'forwards' });
-  inner.animate([
-    { transform: startRot === 'none' ? 'rotateY(0deg)' : startRot },
-    { transform: 'rotateY(-90deg)' },
-  ], { duration: 640, easing: ease, fill: 'forwards' });
-  // 2. the cover swings open on its hinge — the edge that meets the spine,
-  //    which after the turn is the left edge; it comes toward you, then lies flat
+  ], { duration: T.lift, easing: ease, fill: 'forwards' });
+  const startRot = getComputedStyle(inner).transform;
+  inner.animate([{ transform: startRot === 'none' ? 'rotateY(0deg)' : startRot }, { transform: 'rotateY(-90deg)' }],
+    { duration: T.lift, easing: ease, fill: 'forwards' });
+
+  // 2. the cover swings open on its hinge (the edge at the spine, now on the left)
+  const d = cssPx(b, '--d');
   const base = `rotateY(90deg) translateZ(${w / 2}px)`;
   const hinge = a => `${base} translateX(${-d / 2}px) rotateY(${a}deg) translateX(${d / 2}px)`;
-  const swing = { duration: 600, delay: 500, easing: 'cubic-bezier(.3,.7,.2,1)', fill: 'forwards' };
-  cover.animate([{ transform: hinge(0) }, { transform: hinge(-168) }], swing);
-  fly.querySelector('.bk-inside').animate([{ transform: hinge(0) + ' rotateY(180deg)' }, { transform: hinge(-168) + ' rotateY(180deg)' }], swing);
-  // the small page gives way to the big one
-  fly.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: 960, easing: 'ease-in', fill: 'forwards' });
-  // 3. the page grows until it is the whole screen
+  const swing = { duration: T.open, delay: T.lift - 80, easing: 'cubic-bezier(.4,.6,.2,1)', fill: 'forwards' };
+  cover.animate([{ transform: hinge(0) }, { transform: hinge(-180) }], swing);
+  inside.animate([{ transform: hinge(0) + ' rotateY(180deg)' }, { transform: hinge(-180) + ' rotateY(180deg)' }], swing);
+
+  // 3. the open book comes toward you until the page is the screen
   const veil = document.createElement('div');
   veil.className = 'pageveil';
   document.body.appendChild(veil);
-  const pw = d * S, ph = h * S;                                    // page size on screen
-  const px = innerWidth / 2 - pw / 2 + (w * S) / 2 - 2, py = innerHeight / 2 - 10 - ph / 2;
-  const small = `translate(${px}px,${py}px) scale(${pw / innerWidth},${ph / innerHeight})`;
-  veil.animate([
-    { opacity: 0, transform: small, borderRadius: '3px' },
-    { opacity: 1, transform: small, offset: .25, borderRadius: '3px' },
-    { opacity: 1, transform: 'translate(0,0) scale(1,1)', borderRadius: '0' },
-  ], { duration: 620, delay: 760, easing: 'cubic-bezier(.4,0,.1,1)', fill: 'forwards' });
-  setTimeout(() => { location.href = href; }, 1300);
+  const tZoom = T.lift + T.open - 160;
+  setTimeout(() => {
+    const pg = fly.querySelector('.bk-page').getBoundingClientRect();       // where the page is now, on screen
+    const px = pg.left + pg.width / 2 - r.left, py = pg.top + pg.height / 2 - r.top; // page centre, in the wrapper's frame
+    const F = Math.max(innerWidth / pg.width, innerHeight / pg.height) * 1.15;
+    wrap.style.transformOrigin = `${px}px ${py}px`;
+    wrap.animate([
+      { transform: 'translate(0,0) scale(1)' },
+      { transform: `translate(${innerWidth / 2 - (r.left + px)}px,${innerHeight / 2 - (r.top + py)}px) scale(${F})` },
+    ], { duration: T.zoom, easing: 'cubic-bezier(.55,0,.3,1)', fill: 'forwards' });
+    veil.animate([{ opacity: 0 }, { opacity: 0, offset: .6 }, { opacity: 1 }], { duration: T.zoom, easing: 'ease-in', fill: 'forwards' });
+    setTimeout(() => { location.href = href; }, T.zoom - 20);
+  }, tZoom);
   // if the navigation is cancelled, put the book back
-  setTimeout(() => { if (!document.hidden && opening){ fly.remove(); veil.remove(); b.style.visibility = ''; opening = false; } }, 6000);
+  setTimeout(() => { if (!document.hidden && opening){ wrap.remove(); veil.remove(); b.style.visibility = ''; opening = false; } }, 6000);
 }
 card.addEventListener('click', e => {
   const a = e.target.closest('.cc-go');
@@ -383,7 +392,7 @@ card.addEventListener('click', e => {
 // Coming back with the back button: put everything back.
 addEventListener('pageshow', e => {
   opening = false;
-  $$('.bk.fly, .pageveil').forEach(x => x.remove());
+  $$('.flywrap, .pageveil').forEach(x => x.remove());
   books.forEach(b => { b.classList.remove('sel', 'nudge-l', 'nudge-r'); b.style.visibility = ''; });
   if (e.persisted) stacks.classList.remove('ready');
 });

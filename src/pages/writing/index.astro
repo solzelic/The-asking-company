@@ -25,7 +25,7 @@ let n = 0;
         <div class="stats">
           <span>{books.length} {books.length === 1 ? 'volume' : 'volumes'}</span>
           <span>{totalWords.toLocaleString('en-US')} words</span>
-          <span>{shelves.length} shelves</span>
+          <span>{planned.length} planned</span>
         </div>
       </header>
 
@@ -38,8 +38,8 @@ let n = 0;
           </label>
           <div class="seg" role="group" aria-label="Voice">
             <button type="button" data-voice="all" aria-pressed="true">All</button>
-            <button type="button" data-voice="company" aria-pressed="false" title="Written for the company, in its voice">Company</button>
-            <button type="button" data-voice="own" aria-pressed="false" title="Written for their own sake">Own</button>
+            <button type="button" data-voice="company" aria-pressed="false" title="Written for the company, in its voice">For the company</button>
+            <button type="button" data-voice="own" aria-pressed="false" title="Written for their own sake">For its own sake</button>
           </div>
           <div class="menu-wrap">
             <label class="vh" for="sort">Sort</label>
