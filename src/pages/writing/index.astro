@@ -16,6 +16,10 @@ let n = 0;
 ---
 <Library title="The Library — Asking Company"
   description="Longer pieces, bound and shelved. Essays from the founder of Asking Company, some for the company and some for their own sake.">
+  <script is:inline>
+    /* A book is on its way home: skip the page's own entrance so it has the stage. */
+    try { if (sessionStorage.getItem('ac-return')) document.documentElement.classList.add('landing'); } catch (e) {}
+  </script>
   <div class="room" id="room">
     <div class="rwrap">
       <header class="rhead">

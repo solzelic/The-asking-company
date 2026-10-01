@@ -468,8 +468,8 @@ function landBook(){
     { transform: `translate(0,0) scale(${S})` },
     { transform: `translate(${dx * .6}px,${dy * .55 - 40}px) scale(${1 + (S - 1) * .45})`, offset: .5 },
     { transform: `translate(${dx}px,${dy}px) scale(1)` },
-  ], { duration: 640, delay: 80, easing: ease, fill: 'forwards' });
-  inner.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], { duration: 640, delay: 80, easing: ease, fill: 'forwards' });
+  ], { duration: 620, easing: ease, fill: 'forwards' });
+  inner.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], { duration: 620, easing: ease, fill: 'forwards' });
   flight.finished.then(() => {
     b.style.visibility = '';
     wrap.remove();
@@ -477,8 +477,10 @@ function landBook(){
     b.animate([{ transform: 'translateY(-6px) rotate(var(--lean))' }, { transform: 'translateY(0) rotate(var(--lean))' }],
       { duration: 420, easing: 'cubic-bezier(.2,1.4,.4,1)' });
   }).catch(() => { b.style.visibility = ''; wrap.remove(); });
+  document.documentElement.classList.remove('landing');
+  return true;
 }
-landBook();
+const landed = landBook();
 addEventListener('pageshow', e => { if (e.persisted) landBook(); });
 
 /* ── the lamp follows you ── */
@@ -494,5 +496,5 @@ if (!reduced && !coarse){
 /* ── go ── */
 readURL();
 apply(false);
-requestAnimationFrame(() => stacks.classList.add('ready'));
+if (!landed) requestAnimationFrame(() => stacks.classList.add('ready'));
 setTimeout(() => stacks.classList.remove('ready'), 3200); // entrance only once

@@ -261,18 +261,17 @@ function putBack(href){
   const big = `translate(${innerWidth / 2 - (r.left + px)}px,${innerHeight / 2 - (r.top + py)}px) scale(${F})`;
   wrap.style.transform = big;
 
-  // 1. the words fade; the room darkens behind the page
+  // One continuous motion: the words go, the page draws back into the
+  // book, and the cover closes as it arrives — no beat waits for the last.
   html.classList.add('leaving');
-  dark.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 520, delay: 120, easing: 'ease-in-out', fill: 'forwards' });
-  // 2. the page shrinks back into the open book
+  dark.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-in-out', fill: 'forwards' });
   wrap.animate([{ transform: big }, { transform: 'translate(0,0) scale(1)' }],
-    { duration: 520, delay: 180, easing: 'cubic-bezier(.3,0,.2,1)', fill: 'forwards' });
-  // 3. the cover closes
-  const swing = { duration: 460, delay: 640, easing: 'cubic-bezier(.4,.6,.2,1)', fill: 'forwards' };
+    { duration: 560, easing: 'cubic-bezier(.35,0,.15,1)', fill: 'forwards' });
+  const swing = { duration: 440, delay: 330, easing: 'cubic-bezier(.4,.5,.2,1)', fill: 'forwards' };
   cover.animate([{ transform: hinge(-180) }, { transform: hinge(0) }], swing);
   inside.animate([{ transform: hinge(-180) + ' rotateY(180deg)' }, { transform: hinge(0) + ' rotateY(180deg)' }], swing);
-  // 4. hand it to the shelf
-  setTimeout(() => { location.href = href; }, 1120);
+  // hand it to the shelf the moment the cover is shut
+  setTimeout(() => { location.href = href; }, 760);
   setTimeout(() => { if (!document.hidden && leaving){ wrap.remove(); dark.remove(); html.classList.remove('leaving'); leaving = false; } }, 6000);
 }
 document.addEventListener('click', e => {

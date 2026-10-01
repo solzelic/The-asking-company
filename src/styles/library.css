@@ -422,6 +422,7 @@ html.settle .tools.away{animation:none}
 html.settle .prose > p:first-of-type::first-letter{animation:ink 1s .95s var(--ease) both}
 @media (prefers-reduced-motion:reduce){ html.settle .lbar,html.settle .ehead > *,html.settle .prose > *,html.settle .tools{animation:none} }
 
+html.landing .rhead > *,html.landing .controls{animation:none}
 /* ── the way back: putting the book down ── */
 .putback{display:none}
 .roomveil{position:fixed;inset:0;z-index:100;background:#14110c;opacity:0;pointer-events:none}

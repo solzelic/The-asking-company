@@ -24,6 +24,7 @@ const accent = lum(b.spine) < 0.55 ? b.spine : '#0f766e';
 <Library title={`${b.title.replace(/\.$/, '')} — Asking Company`} description={b.dek} tone="light"
   type="article" published={b.date.toISOString()} accent={accent} progress>
   <Fragment slot="head">
+    <link rel="prefetch" href="/writing">
     <script is:inline>
       /* Apply saved reader settings before first paint, so nothing flashes. */
       try {
