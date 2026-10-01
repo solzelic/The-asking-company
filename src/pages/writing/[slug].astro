@@ -34,6 +34,15 @@ const accent = lum(b.spine) < 0.55 ? b.spine : '#0f766e';
         if (s.lh) h.style.setProperty('--lh', s.lh);
         if (s.mw) h.style.setProperty('--mw', s.mw);
       } catch (e) {}
+      /* A fresh opening always starts at the top. Back/forward keeps the
+         browser's restored position; a #section link keeps its target. */
+      try {
+        var nav = performance.getEntriesByType('navigation')[0];
+        if (!(nav && nav.type === 'back_forward') && !location.hash) {
+          scrollTo(0, 0);
+          addEventListener('load', function(){ scrollTo(0, 0); }, { once: true });
+        }
+      } catch (e) {}
     </script>
   </Fragment>
   <Fragment slot="bar">
