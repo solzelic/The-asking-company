@@ -43,7 +43,8 @@ Every essay page has a floating **Listen · Aa · Share** pill.
 - **Listen** reads the essay aloud with the browser's own voice and highlights the paragraph being read.
 - **The rail** on the right shows progress with a tick for every section: hover for the name, click to jump.
 - The page remembers where you stopped and offers to resume. Selecting text offers *Copy quote*. ← and → move between essays.
-- Clicking a book on the shelf flies it into the essay's bookplate (browsers with view transitions; others just navigate).
+- Clicking a book lifts it off the shelf, turns it to face you, opens the cover to the first page, and the page grows into the essay. (With "reduce motion" on, it just navigates.)
+- Each shelf has a **Follow this shelf** form; the address is stored with the shelf's id in the `series` column of `subscribers`, so you can email only the people who follow a series. The form at the bottom of the Library subscribes to everything.
 
 ## Search
 

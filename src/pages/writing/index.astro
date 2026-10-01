@@ -25,84 +25,90 @@ let n = 0;
         <div class="stats">
           <span>{books.length} {books.length === 1 ? 'volume' : 'volumes'}</span>
           <span>{totalWords.toLocaleString('en-US')} words</span>
-          <span>{planned.length} planned</span>
+          <span>{shelves.length} shelves</span>
         </div>
       </header>
 
       <div class="controls" id="controls">
-        <div class="crow">
+        <div class="bar">
           <label class="search">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <span class="vh">Search the stacks</span>
-            <input type="search" id="q" placeholder="Search the stacks…" autocomplete="off">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <span class="vh">Search the essays</span>
+            <input type="search" id="q" placeholder="Search every essay…" autocomplete="off" spellcheck="false">
           </label>
           <div class="seg" role="group" aria-label="Voice">
-            <button data-voice="all" aria-pressed="true">All</button>
-            <button data-voice="company" aria-pressed="false" title="Written for the company, in its voice">For the company</button>
-            <button data-voice="own" aria-pressed="false" title="Written for their own sake">For its own sake</button>
+            <button type="button" data-voice="all" aria-pressed="true">All</button>
+            <button type="button" data-voice="company" aria-pressed="false" title="Written for the company, in its voice">Company</button>
+            <button type="button" data-voice="own" aria-pressed="false" title="Written for their own sake">Own</button>
           </div>
-          <button class="ctoggle" id="ctoggle" aria-expanded="false" aria-controls="controls">Filters</button>
-        </div>
-        <div class="crow more-ctl">
-          <div class="chips" role="group" aria-label="Shelf">
-            <span class="lab">Shelf</span>
-            <button class="chip" data-shelf="all" aria-pressed="true">All</button>
-            {shelves.map(s => (
-              <button class="chip" data-shelf={s.id} aria-pressed="false">{s.name}<span class="n">{books.filter(b => b.series === s.id).length}</span></button>
-            ))}
-          </div>
-        </div>
-        {tags.length > 0 && (
-          <div class="crow more-ctl">
-            <div class="chips" role="group" aria-label="Topic">
-              <span class="lab">Topic</span>
-              {tags.map(([t, c]) => <button class="chip" data-tag={t} aria-pressed="false">{t}<span class="n">{c}</span></button>)}
+          <div class="menu-wrap">
+            <button type="button" class="mbtn" id="filterBtn" aria-expanded="false" aria-controls="filterPop">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+              Filter<span class="badge" id="filterBadge" hidden></span>
+            </button>
+            <div class="pop" id="filterPop" hidden>
+              <div class="pcol">
+                <div class="plab">Shelf</div>
+                <button type="button" class="prow" data-shelf="all" aria-pressed="true"><span>All shelves</span><i>{books.length}</i></button>
+                {shelves.map(s => <button type="button" class="prow" data-shelf={s.id} aria-pressed="false"><span>{s.name}</span><i>{books.filter(b => b.series === s.id).length}</i></button>)}
+              </div>
+              {tags.length > 0 && (
+                <div class="pcol">
+                  <div class="plab">Topics</div>
+                  {tags.map(([t, c]) => <button type="button" class="prow" data-tag={t} aria-pressed="false"><span>{t}</span><i>{c}</i></button>)}
+                </div>
+              )}
+              <div class="pfoot">
+                <label class="toggle"><input type="checkbox" id="planned" checked> Show unwritten volumes</label>
+                <button type="button" id="clear" class="plink">Clear all</button>
+              </div>
             </div>
           </div>
-        )}
-        <div class="crow more-ctl">
-          <label class="vh" for="sort">Sort</label>
-          <select class="sel" id="sort">
-            <option value="shelf">By shelf</option>
-            <option value="new">Newest first</option>
-            <option value="old">Oldest first</option>
-            <option value="long">Longest first</option>
-            <option value="short">Shortest first</option>
-            <option value="az">A – Z</option>
-          </select>
-          <div class="seg" role="group" aria-label="View">
-            <button data-view="shelf" aria-pressed="true">Shelf</button>
-            <button data-view="index" aria-pressed="false">Index</button>
+          <div class="menu-wrap">
+            <label class="vh" for="sort">Sort</label>
+            <select class="mbtn sel" id="sort">
+              <option value="shelf">By shelf</option>
+              <option value="new">Newest first</option>
+              <option value="old">Oldest first</option>
+              <option value="long">Longest first</option>
+              <option value="short">Shortest first</option>
+              <option value="az">A – Z</option>
+            </select>
           </div>
-          <label class="toggle"><input type="checkbox" id="planned" checked> Unwritten volumes</label>
-          <span class="count" id="count" aria-live="polite"></span>
+          <div class="seg view" role="group" aria-label="View">
+            <button type="button" data-view="shelf" aria-pressed="true" aria-label="Shelf view"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 20h16M6 20V9M10 20V5M14 20V8M18 20V11"/></svg></button>
+            <button type="button" data-view="index" aria-pressed="false" aria-label="Index view"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>
+          </div>
         </div>
+        <div class="active" id="active" hidden></div>
       </div>
 
       <div class="results" id="results" hidden aria-live="polite"></div>
 
       <div class="stacks" id="stacks">
-        <div class="shelves">
+        <div class="shelves" id="shelves">
           {shelves.map(s => (
             <section class="sgroup" data-group={s.id}>
               <div class="shead">
-                <div><div class="no">{s.no}</div><h2>{s.name}</h2></div>
+                <div><div class="no">{s.no}</div><h2>{s.name}</h2><p class="snote">{s.note}</p></div>
                 <div class="ct" data-ct></div>
               </div>
-              <p class="snote">{s.note}</p>
               <div class="case" data-case={s.id}>
                 {all.filter(b => b.series === s.id).map(b => <Book book={b} i={n++} />)}
               </div>
+              <form class="follow" data-subscribe={`series:${s.id}`} data-done="Following. You will hear when this shelf grows.">
+                <span class="flab"><b>Follow this shelf.</b> One email when a volume is added here.</span>
+                <input type="email" required placeholder="you@example.com" autocomplete="email" aria-label={`Email address, to follow ${s.name}`}>
+                <input type="hidden" name="series" value={s.id}>
+                <button type="submit">Follow</button>
+              </form>
             </section>
           ))}
-          <section class="sgroup" data-group="__flat" hidden>
-            <div class="shead"><div><div class="no">All shelves</div><h2 data-flat-title>Everything</h2></div></div>
-            <p class="snote" data-flat-note></p>
+          <section class="sgroup flat" data-group="__flat" hidden>
+            <div class="shead"><div><div class="no">All shelves</div><h2 data-flat-title>Everything</h2><p class="snote" data-flat-note></p></div></div>
             <div class="case" data-case="__flat"></div>
           </section>
-          <p class="empty-all" id="emptyAll" hidden style="text-align:center;font-style:italic;color:var(--cream-60);font-size:20px;padding:40px 0">
-            Nothing on the shelves matches. It may not have been written yet.
-          </p>
+          <p class="empty-all" id="emptyAll" hidden>Nothing on the shelves matches. It may not have been written yet.</p>
         </div>
 
         <div class="index" id="index">
@@ -125,8 +131,8 @@ let n = 0;
       <div class="card-slot"><div class="ccard" id="ccard" aria-hidden="true"></div></div>
 
       <section class="rsub">
-        <h2>Be told when there is something new.</h2>
-        <p>A handful of times a year, if that. There is no schedule and we will not invent one.</p>
+        <h2>Be told when anything is released.</h2>
+        <p>Every shelf, every volume. A handful of times a year, if that. There is no schedule and we will not invent one.</p>
         <form class="subf" data-subscribe="library" data-done="You are on the list. You will hear from us when something is shelved.">
           <input type="email" required placeholder="you@example.com" autocomplete="email" aria-label="Email address">
           <input type="hidden" name="writings" value="1">
@@ -135,7 +141,6 @@ let n = 0;
         <p class="subnote">Or follow along by <a href="/rss.xml">RSS</a>.</p>
       </section>
     </div>
-    <div class="veil" id="veil"></div>
   </div>
   <script>import '../../scripts/library.js';</script>
 </Library>

@@ -15,7 +15,8 @@ document.addEventListener('submit', async e => {
     if (!el) return false;
     return el.type === 'checkbox' ? el.checked : true;
   };
-  const body = { email, writings: box('writings'), billion: box('billion'), source: f.dataset.subscribe || 'site' };
+  const series = f.querySelector('input[name=series]')?.value || '';
+  const body = { email, writings: box('writings') || !!series, billion: box('billion'), series, source: f.dataset.subscribe || 'site' };
   const btn = f.querySelector('button');
   if (btn) btn.disabled = true;
   let ok = false;

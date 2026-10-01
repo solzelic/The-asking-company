@@ -1,7 +1,6 @@
 ---
 import { render } from 'astro:content';
 import Library from '../../layouts/Library.astro';
-import Book from '../../components/Book.astro';
 import { getBooks } from '../../lib/library.js';
 import { SITE } from '../../site.config.js';
 
@@ -20,8 +19,6 @@ const url = new URL(b.href, SITE.url).href;
 const lum = (hex) => { const n = parseInt(hex.replace('#', '').padEnd(6, '0'), 16);
   return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
 const accent = lum(b.spine) < 0.55 ? b.spine : '#0f766e';
-// The bookplate: the same book, two-thirds size.
-const plate = { ...b, w: Math.max(26, Math.round(b.w * .72)), h: Math.round(b.h * .72) };
 ---
 <Library title={`${b.title.replace(/\.$/, '')} — Asking Company`} description={b.dek} tone="light"
   type="article" published={b.date.toISOString()} accent={accent} progress>
@@ -46,15 +43,10 @@ const plate = { ...b, w: Math.max(26, Math.round(b.w * .72)), h: Math.round(b.h 
   <article class="essay-page" data-slug={b.slug} data-title={b.title} data-dek={b.dek} data-words={b.words} data-pagefind-body
     data-pagefind-meta={`series:${b.seriesName}, date:${b.dateLabel}, minutes:${b.minutes}`}>
     <header class="ehead">
-      <div class="top" data-pagefind-ignore>
-        <a class="plate" href={`/writing?shelf=${b.series}`} style={`--pw:${plate.w}px;--ph:${plate.h}px`} aria-label="Back to the shelf">
-          <Book book={plate} vt still />
-        </a>
-        <div class="crumbs">
-          <a href="/writing">The Library</a><span class="mut">/</span>
-          <a href={`/writing?shelf=${b.series}`}>{b.seriesName}</a><span class="mut">/</span>
-          <span class="mut">No. {b.no}</span>
-        </div>
+      <div class="crumbs" data-pagefind-ignore>
+        <a href="/writing">The Library</a><span class="mut">/</span>
+        <a href={`/writing?shelf=${b.series}`}>{b.seriesName}</a><span class="mut">/</span>
+        <span class="mut">No. {b.no}</span>
       </div>
       <h1 data-pagefind-meta="title">{b.title}</h1>
       <p class="dek">{b.dek}</p>

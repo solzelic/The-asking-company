@@ -163,12 +163,25 @@ function apply(animate = true){
   if ($('q').value !== S.q) $('q').value = S.q;
   stacks.classList.toggle('view-index', S.view === 'index');
 
-  const shown = on.filter(b => !b.hasAttribute('data-planned')).length;
-  const filtered = S.q || S.voice !== 'all' || S.shelf !== 'all' || S.tags.size;
-  $('count').innerHTML = (filtered ? `Showing ${shown} of ${real.length}` : `${real.length} ${real.length === 1 ? 'volume' : 'volumes'}`) +
-    (filtered ? ' <button type="button" id="clear">Clear</button>' : '');
+  renderActive(on.filter(b => !b.hasAttribute('data-planned')).length);
   hideCard(true);
   writeURL();
+}
+
+/* active filters as pills; the Filter button wears a count */
+const shelfName = id => (document.querySelector(`[data-shelf="${id}"] span`)?.textContent || id);
+function renderActive(shown){
+  const pills = [];
+  if (S.shelf !== 'all') pills.push({ k: 'shelf', v: S.shelf, lab: 'Shelf', txt: shelfName(S.shelf) });
+  S.tags.forEach(t => pills.push({ k: 'tag', v: t, lab: 'Topic', txt: t }));
+  if (!S.planned) pills.push({ k: 'planned', v: '', lab: '', txt: 'Written only' });
+  const nFilters = (S.shelf !== 'all' ? 1 : 0) + S.tags.size + (S.planned ? 0 : 1);
+  const badge = $('filterBadge'); badge.hidden = !nFilters; badge.textContent = nFilters;
+  const act = $('active');
+  const filtered = S.q || S.voice !== 'all' || nFilters;
+  act.hidden = !pills.length && !filtered;
+  act.innerHTML = pills.map(p => `<button type="button" class="pill" data-rm="${p.k}" data-val="${esc(p.v)}">${p.lab ? '<i>' + p.lab + '</i>' : ''}${esc(p.txt)}<b>×</b></button>`).join('') +
+    `<span class="count">${filtered ? `${shown} of ${real.length}` : `${real.length} ${real.length === 1 ? 'volume' : 'volumes'}`}</span>`;
 }
 const g$ = sel => document.querySelector(sel);
 
@@ -220,32 +233,46 @@ function renderResults(q){
     }).join('') : '';
 }
 const slugOf2 = u => (u.split('?')[0].split('#')[0].replace(/\.html$/, '').replace(/\/$/, '').split('/').pop() || '');
+const filterBtn = $('filterBtn'), filterPop = $('filterPop');
+function setPop(o){ filterPop.hidden = !o; filterBtn.setAttribute('aria-expanded', String(o)); }
 controls.addEventListener('click', e => {
   const t = e.target.closest('button');
   if (!t) return;
-  if (t.id === 'clear'){ S.q = ''; S.voice = 'all'; S.shelf = 'all'; S.tags.clear(); hits = null; results.innerHTML = ''; results.hidden = true; apply(); return; }
-  if (t.id === 'ctoggle'){ const o = controls.classList.toggle('open'); t.setAttribute('aria-expanded', String(o)); return; }
+  if (t.id === 'filterBtn'){ setPop(filterPop.hidden); return; }
+  if (t.id === 'clear'){ S.q = ''; S.voice = 'all'; S.shelf = 'all'; S.tags.clear(); S.planned = true; hits = null; results.innerHTML = ''; results.hidden = true; setPop(false); apply(); return; }
+  if (t.dataset.rm){
+    if (t.dataset.rm === 'shelf') S.shelf = 'all';
+    else if (t.dataset.rm === 'tag') S.tags.delete(t.dataset.val);
+    else if (t.dataset.rm === 'planned') S.planned = true;
+    apply(); return;
+  }
   if (t.dataset.voice){ S.voice = t.dataset.voice; apply(); }
   else if (t.dataset.shelf){ S.shelf = t.dataset.shelf; apply(); }
   else if (t.dataset.tag){ S.tags.has(t.dataset.tag) ? S.tags.delete(t.dataset.tag) : S.tags.add(t.dataset.tag); apply(); }
   else if (t.dataset.view){ S.view = t.dataset.view; apply(false); }
 });
+document.addEventListener('click', e => { if (!filterPop.hidden && !e.target.closest('.menu-wrap')) setPop(false); });
+addEventListener('keydown', e => { if (e.key === 'Escape') setPop(false); });
 $('sort').addEventListener('change', e => { S.sort = e.target.value; apply(); });
 $('planned').addEventListener('change', e => { S.planned = e.target.checked; apply(); });
 
 /* ── the catalogue card ── */
 let cardFor = null, hideT;
+const seriesOf = b => document.querySelector(`[data-group="${b.dataset.series}"] h2`)?.textContent || '';
 const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function showCard(b){
   clearTimeout(hideT);
   if (cardFor === b) return;
   const d = b.dataset, planned = b.hasAttribute('data-planned');
-  card.innerHTML = planned
-    ? `<div class="cc-meta"><span>Not yet written</span></div><div class="cc-t">${esc(d.title)}</div><p class="cc-d">${esc(d.dek)}</p>`
-    : `<div class="cc-meta"><span>No. ${esc(d.no)}</span><span>${esc(d.dateLabel)}</span><span>${esc(d.minutes)} min read</span><span>${esc(d.seriesName)}</span></div>` +
-      `<div class="cc-t">${esc(d.title)}</div><p class="cc-d">${esc(d.dek)}</p>` +
-      `<div class="cc-act"><span class="cc-tags">${d.company === '1' ? 'On company letterhead · ' : ''}${esc((d.tags || '').split(' ').filter(Boolean).join(' · '))}</span>` +
-      `<a class="cc-go" href="${b.getAttribute('href')}">Read &rarr;</a></div>`;
+  const cs = getComputedStyle(b);
+  card.innerHTML =
+    `<div class="thumb${planned ? ' pl' : ''}" style="--cloth:${cs.getPropertyValue('--cloth')};--cink:${cs.getPropertyValue('--cink')}"><span>${esc(d.title)}</span></div>` +
+    `<div class="body"><div class="cc-t">${esc(d.title)}</div><p class="cc-d">${esc(d.dek)}</p>` +
+    (planned
+      ? `<div class="cc-act"><span class="cc-meta"><span>Not yet written</span><span>${esc(seriesOf(b))}</span></span></div>`
+      : `<div class="cc-act"><span class="cc-meta"><span>${esc(d.minutes)} min</span><span>${esc(d.dateLabel)}</span>${d.company === '1' ? '<span>Company letterhead</span>' : ''}</span>` +
+        `<a class="cc-go" href="${b.getAttribute('href')}">Read</a></div>`) +
+    `</div>`;
   card.setAttribute('aria-hidden', 'false');
   if (cardFor && !reduced){ card.classList.remove('swap'); void card.offsetWidth; card.classList.add('swap'); }
   card.classList.add('on');
@@ -301,36 +328,70 @@ document.addEventListener('click', e => {
 });
 addEventListener('keydown', e => { if (e.key === 'Escape') deselect(); });
 
-/* ── opening: the book comes off the shelf, the room goes to paper ── */
-const VT = CSS.supports('view-transition-name: x') && 'onpagereveal' in window;
+/* ── opening a book ──
+   The book lifts off the shelf, flies to the centre and turns to face
+   you; the cover swings open on its hinge to show the first page; the
+   page grows until it is the screen — and the screen is the essay. */
+const cssPx = (el, v) => parseFloat(getComputedStyle(el).getPropertyValue(v)) || 0;
+let opening = false;
 function open(b, e){
-  if (reduced) return;
   e.preventDefault();
+  if (opening) return;
+  const href = b.getAttribute('href');
+  if (reduced){ location.href = href; return; }
+  opening = true;
   hideCard(true);
-  if (VT){
-    // Cross-document view transition: this book and the essay's bookplate
-    // share a name, so the browser flies one into the other.
-    books.forEach(x => { x.style.viewTransitionName = ''; });
-    b.style.viewTransitionName = 'book';
-    b.classList.add('lift');
-    location.href = b.getAttribute('href');
-    return;
-  }
-  b.classList.add('opening');
-  $('veil').classList.add('on');
-  setTimeout(() => { location.href = b.getAttribute('href'); }, 560);
+  const r = b.getBoundingClientRect();
+  const w = cssPx(b, '--w'), h = cssPx(b, '--h'), d = cssPx(b, '--d');
+  const fly = b.cloneNode(true);
+  fly.classList.remove('sel', 'nudge-l', 'nudge-r', 'enter');
+  fly.classList.add('fly');
+  fly.removeAttribute('href');
+  Object.assign(fly.style, { left: r.left + 'px', top: r.top + 'px', width: w + 'px', height: h + 'px' });
+  document.body.appendChild(fly);
+  b.style.visibility = 'hidden';
+  nudge(b, false);
+
+  const inner = fly.querySelector('.bk-3d'), cover = fly.querySelector('.bk-cover');
+  const S = Math.min(innerHeight * .6, 460) / h;                  // final scale
+  const cx = innerWidth / 2 - (r.left + w / 2), cy = innerHeight / 2 - (r.top + h / 2) - 10;
+  const ease = 'cubic-bezier(.22,.8,.2,1)';
+  const startRot = getComputedStyle(inner).transform;
+  // 1. up off the shelf, out to the centre, turning to face you
+  fly.animate([
+    { transform: 'translate(0,0) scale(1)' },
+    { transform: `translate(${cx * .35}px,${cy * .25 - 60}px) scale(${1 + (S - 1) * .4})`, offset: .45 },
+    { transform: `translate(${cx}px,${cy}px) scale(${S})` },
+  ], { duration: 640, easing: ease, fill: 'forwards' });
+  inner.animate([
+    { transform: startRot === 'none' ? 'rotateY(0deg)' : startRot },
+    { transform: 'rotateY(-90deg)' },
+  ], { duration: 640, easing: ease, fill: 'forwards' });
+  // 2. the cover swings open on its hinge — the edge that meets the spine,
+  //    which after the turn is the left edge; it comes toward you, then lies flat
+  const base = `rotateY(90deg) translateZ(${w / 2}px)`;
+  const hinge = a => `${base} translateX(${-d / 2}px) rotateY(${a}deg) translateX(${d / 2}px)`;
+  const swing = { duration: 600, delay: 500, easing: 'cubic-bezier(.3,.7,.2,1)', fill: 'forwards' };
+  cover.animate([{ transform: hinge(0) }, { transform: hinge(-168) }], swing);
+  fly.querySelector('.bk-inside').animate([{ transform: hinge(0) + ' rotateY(180deg)' }, { transform: hinge(-168) + ' rotateY(180deg)' }], swing);
+  // the small page gives way to the big one
+  fly.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: 960, easing: 'ease-in', fill: 'forwards' });
+  // 3. the page grows until it is the whole screen
+  const veil = document.createElement('div');
+  veil.className = 'pageveil';
+  document.body.appendChild(veil);
+  const pw = d * S, ph = h * S;                                    // page size on screen
+  const px = innerWidth / 2 - pw / 2 + (w * S) / 2 - 2, py = innerHeight / 2 - 10 - ph / 2;
+  const small = `translate(${px}px,${py}px) scale(${pw / innerWidth},${ph / innerHeight})`;
+  veil.animate([
+    { opacity: 0, transform: small, borderRadius: '3px' },
+    { opacity: 1, transform: small, offset: .25, borderRadius: '3px' },
+    { opacity: 1, transform: 'translate(0,0) scale(1,1)', borderRadius: '0' },
+  ], { duration: 620, delay: 760, easing: 'cubic-bezier(.4,0,.1,1)', fill: 'forwards' });
+  setTimeout(() => { location.href = href; }, 1300);
+  // if the navigation is cancelled, put the book back
+  setTimeout(() => { if (!document.hidden && opening){ fly.remove(); veil.remove(); b.style.visibility = ''; opening = false; } }, 6000);
 }
-// Coming back from an essay: that book is the one that flies home.
-addEventListener('pagereveal', e => {
-  if (!e.viewTransition) return;
-  const from = navigation?.activation?.from?.url || document.referrer || '';
-  const sl = (from.split('?')[0].split('#')[0].replace(/\.html$/, '').replace(/\/$/, '').split('/').pop() || '');
-  const b = real.find(x => x.dataset.slug === sl);
-  if (!b) return;
-  stacks.classList.remove('ready');
-  b.style.viewTransitionName = 'book';
-  e.viewTransition.finished.then(() => { b.style.viewTransitionName = ''; });
-});
 card.addEventListener('click', e => {
   const a = e.target.closest('.cc-go');
   if (!a || reduced || e.metaKey || e.ctrlKey) return;
@@ -339,9 +400,10 @@ card.addEventListener('click', e => {
 });
 // Coming back with the back button: put everything back.
 addEventListener('pageshow', e => {
-  if (!e.persisted) return;
-  $('veil').classList.remove('on');
-  books.forEach(b => { b.classList.remove('opening', 'lift', 'sel', 'nudge-l', 'nudge-r'); b.style.viewTransitionName = ''; });
+  opening = false;
+  $$('.bk.fly, .pageveil').forEach(x => x.remove());
+  books.forEach(b => { b.classList.remove('sel', 'nudge-l', 'nudge-r'); b.style.visibility = ''; });
+  if (e.persisted) stacks.classList.remove('ready');
 });
 
 /* ── the lamp follows you ── */

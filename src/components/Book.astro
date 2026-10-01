@@ -5,14 +5,13 @@
 interface Props {
   book: any;
   i?: number;
-  vt?: boolean;   // give this book the shared view-transition name
-  still?: boolean; // render as a plain element (no link), e.g. inside another link
+  still?: boolean; // render as a plain element (no link)
 }
-const { book: b, i = 0, vt = false, still = false } = Astro.props;
+const { book: b, i = 0, still = false } = Astro.props;
 const Tag = still ? 'span' : 'a';
 const d = Math.round(b.h * 0.68); // cover width = depth of the box
 const style = `--w:${b.w}px;--h:${b.h}px;--d:${d}px;--cloth:${b.spine || '#847d70'};` +
-  `--cink:${b.spineInk || '#f7f4ec'};--lean:${b.lean || 0}deg;--i:${i}` + (vt ? ';view-transition-name:book' : '');
+  `--cink:${b.spineInk || '#f7f4ec'};--lean:${b.lean || 0}deg;--i:${i}`;
 ---
 {b.planned ? (
   <div class="bk planned" style={style} data-planned data-slug={b.slug} data-series={b.series} data-order={i}
@@ -46,6 +45,8 @@ const style = `--w:${b.w}px;--h:${b.h}px;--d:${d}px;--cloth:${b.spine || '#847d7
           </>
         )}
       </span>
+      <span class="bk-page"><span class="pg-t">{b.title}</span><span class="pg-l"></span></span>
+      <span class="bk-inside"></span>
       <span class="bk-top"></span>
       <span class="bk-back"></span>
     </span>
