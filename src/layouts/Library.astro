@@ -20,6 +20,7 @@ const onIndex = Astro.url.pathname.replace(/(\.html|\/)$/, '') === '/writing';
 ---
 <Base title={title} description={description} image={image} type={type} published={published}
       themeColor={tone === 'dark' ? '#14110c' : '#f7f4ec'}>
+<slot name="head" slot="head" />
 <body class={tone} style={accent ? `--accent:${accent}` : undefined}>
   <header class="lbar" id="lbar">
     <div class="lbar-in">
@@ -32,6 +33,7 @@ const onIndex = Astro.url.pathname.replace(/(\.html|\/)$/, '') === '/writing';
         <a href="/prospectus" class="hide-s">The Company</a>
         <a href="/" class="give">Give $1</a>
       </nav>
+      <slot name="bar" />
     </div>
     {progress && <div class="progress" id="progress"></div>}
   </header>

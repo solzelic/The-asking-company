@@ -3,7 +3,7 @@
 Two halves, one site:
 
 - **The company** (`/`, `/prospectus`, `/filings`, `/careers`, `/legal`, `/contact`, `/shop`): the joke. Paper, banknote frames, one spot ink per page.
-- **The Library** (`/writing`): the quiet half. A lit bookcase with filters, and essays set for reading.
+- **The Library** (`/writing`): the quiet half. A lit bookcase with filters and full-text search, and essays set for reading.
 
 Built with [Astro](https://astro.build) as a static site. The few dynamic parts (payments, the live counter and ledger, the mailing list) are small Cloudflare Pages Functions in `functions/`, backed by a Cloudflare D1 database.
 
@@ -34,6 +34,20 @@ The rest is automatic: the spine's thickness follows the word count, and the boo
 
 - **Shelves** live in `src/data/series.js`. Add a new one there.
 - **Unwritten books** (dashed outlines) are the `PLANNED` list in the same file. Delete an entry once the real piece exists.
+
+## Reading features
+
+Every essay page has a floating **Listen · Aa · Share** pill.
+
+- **Aa** opens the reading settings: typeface (Newsreader, Inter, Atkinson Hyperlegible, OpenDyslexic), size, spacing, width, theme (paper / sepia / night) and a focus mode that dims everything but the paragraph you are on. Settings are remembered in the browser and applied before the page paints.
+- **Listen** reads the essay aloud with the browser's own voice and highlights the paragraph being read.
+- **The rail** on the right shows progress with a tick for every section: hover for the name, click to jump.
+- The page remembers where you stopped and offers to resume. Selecting text offers *Copy quote*. ← and → move between essays.
+- Clicking a book on the shelf flies it into the essay's bookplate (browsers with view transitions; others just navigate).
+
+## Search
+
+Search in the Library reads the essays themselves, not only titles. [Pagefind](https://pagefind.app) builds the index after each `npm run build` (that is the `pagefind --site dist` in the build script) and splits it into small chunks, so the browser only downloads the pieces a query touches — it stays fast with hundreds of essays. Results show the matching passage with the words highlighted and link straight to the section. In `npm run dev` the index does not exist, so search falls back to titles and summaries.
 
 ## Running it locally
 

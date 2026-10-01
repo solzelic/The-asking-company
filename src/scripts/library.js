@@ -18,6 +18,8 @@ const rowFor = Object.fromEntries(rows.map(r => [r.dataset.for, r]));
 
 /* ── state, mirrored in the URL so a filtered shelf can be linked ── */
 const S = { q: '', voice: 'all', shelf: 'all', tags: new Set(), sort: 'shelf', view: 'shelf', planned: true };
+/* Full-text hits from Pagefind for the current query: slug → result, or null while title-only. */
+let hits = null;
 
 function readURL(){
   const p = new URLSearchParams(location.search);
@@ -49,7 +51,9 @@ function matches(el){
   if (S.shelf !== 'all' && d.series !== S.shelf) return false;
   if (S.q){
     const hay = norm([d.title, d.dek, d.tags, d.seriesName].join(' '));
-    if (!norm(S.q).split(/\s+/).every(w => hay.includes(w))) return false;
+    const titleHit = norm(S.q).split(/\s+/).every(w => hay.includes(w));
+    const textHit = !!(hits && d.slug && hits.has(d.slug));
+    if (!titleHit && !textHit) return false;
   }
   if (planned) return S.planned && S.voice === 'all' && S.tags.size === 0;
   if (S.voice === 'company' && d.company !== '1') return false;
@@ -170,11 +174,56 @@ const g$ = sel => document.querySelector(sel);
 
 /* ── controls ── */
 let qTimer;
-$('q').addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { S.q = e.target.value.trim(); apply(); }, 180); });
+$('q').addEventListener('input', e => { clearTimeout(qTimer); qTimer = setTimeout(() => { S.q = e.target.value.trim(); search(); }, 180); });
+
+/* ── full-text search ──
+   Pagefind indexes every essay at build time into small chunks, so the
+   browser only downloads the pieces a query touches. Loaded on first use.
+   If it is missing (dev server), search falls back to titles and summaries. */
+let pf = null, pfLoad = null, searchSeq = 0;
+function loadPF(){
+  if (pfLoad) return pfLoad;
+  pfLoad = import(/* @vite-ignore */ new URL('pagefind/pagefind.js', document.baseURI).href)
+    .then(async m => { await m.init?.(); pf = m; return m; })
+    .catch(() => null);
+  return pfLoad;
+}
+const results = $('results');
+async function search(){
+  const q = S.q, seq = ++searchSeq;
+  if (!q){ hits = null; results.innerHTML = ''; results.hidden = true; apply(); return; }
+  const m = await loadPF();
+  if (seq !== searchSeq) return;
+  if (!m){ hits = null; results.hidden = true; apply(); return; }
+  const r = await m.search(q);
+  if (seq !== searchSeq) return;
+  const top = await Promise.all(r.results.slice(0, 24).map(x => x.data()));
+  if (seq !== searchSeq) return;
+  hits = new Map();
+  const slugOf = u => (u.split('?')[0].split('#')[0].replace(/\.html$/, '').replace(/\/$/, '').split('/').pop() || '');
+  top.forEach(d => { const sl = slugOf(d.url); if (sl && !hits.has(sl)) hits.set(sl, d); });
+  renderResults(q);
+  apply();
+}
+function renderResults(q){
+  const list = [...hits.values()];
+  results.hidden = !list.length;
+  results.innerHTML = list.length ? `<div class="rhd"><span>Found in the text</span><span>${list.length} ${list.length === 1 ? 'essay' : 'essays'} mention “${esc(q)}”</span></div>` +
+    list.map(d => {
+      const b = real.find(x => x.dataset.slug === slugOf2(d.url));
+      const href = b ? b.getAttribute('href') : d.url;
+      const subs = (d.sub_results || []).filter(sr => sr.anchor && sr.anchor.element !== 'h1').slice(0, 3);
+      const extra = subs.map(sr => `<a class="sub" href="${esc(href + '#' + sr.anchor.id)}"><span class="st">${esc(sr.title)}</span><span class="sx">${sr.excerpt}</span></a>`).join('');
+      return `<div class="hit" style="--cloth:${b ? getComputedStyle(b).getPropertyValue('--cloth') : 'var(--brass)'}">` +
+        `<a class="main" href="${esc(href)}"><span class="sw"></span><span><span class="ht">${esc(d.meta?.title || '')}</span>` +
+        `<span class="hx">${d.excerpt}</span></span></a>${extra ? '<div class="subs">' + extra + '</div>' : ''}</div>`;
+    }).join('') : '';
+}
+const slugOf2 = u => (u.split('?')[0].split('#')[0].replace(/\.html$/, '').replace(/\/$/, '').split('/').pop() || '');
 controls.addEventListener('click', e => {
   const t = e.target.closest('button');
   if (!t) return;
-  if (t.id === 'clear'){ S.q = ''; S.voice = 'all'; S.shelf = 'all'; S.tags.clear(); apply(); return; }
+  if (t.id === 'clear'){ S.q = ''; S.voice = 'all'; S.shelf = 'all'; S.tags.clear(); hits = null; results.innerHTML = ''; results.hidden = true; apply(); return; }
   if (t.id === 'ctoggle'){ const o = controls.classList.toggle('open'); t.setAttribute('aria-expanded', String(o)); return; }
   if (t.dataset.voice){ S.voice = t.dataset.voice; apply(); }
   else if (t.dataset.shelf){ S.shelf = t.dataset.shelf; apply(); }
@@ -253,14 +302,35 @@ document.addEventListener('click', e => {
 addEventListener('keydown', e => { if (e.key === 'Escape') deselect(); });
 
 /* ── opening: the book comes off the shelf, the room goes to paper ── */
+const VT = CSS.supports('view-transition-name: x') && 'onpagereveal' in window;
 function open(b, e){
   if (reduced) return;
   e.preventDefault();
   hideCard(true);
+  if (VT){
+    // Cross-document view transition: this book and the essay's bookplate
+    // share a name, so the browser flies one into the other.
+    books.forEach(x => { x.style.viewTransitionName = ''; });
+    b.style.viewTransitionName = 'book';
+    b.classList.add('lift');
+    location.href = b.getAttribute('href');
+    return;
+  }
   b.classList.add('opening');
   $('veil').classList.add('on');
   setTimeout(() => { location.href = b.getAttribute('href'); }, 560);
 }
+// Coming back from an essay: that book is the one that flies home.
+addEventListener('pagereveal', e => {
+  if (!e.viewTransition) return;
+  const from = navigation?.activation?.from?.url || document.referrer || '';
+  const sl = (from.split('?')[0].split('#')[0].replace(/\.html$/, '').replace(/\/$/, '').split('/').pop() || '');
+  const b = real.find(x => x.dataset.slug === sl);
+  if (!b) return;
+  stacks.classList.remove('ready');
+  b.style.viewTransitionName = 'book';
+  e.viewTransition.finished.then(() => { b.style.viewTransitionName = ''; });
+});
 card.addEventListener('click', e => {
   const a = e.target.closest('.cc-go');
   if (!a || reduced || e.metaKey || e.ctrlKey) return;
@@ -271,7 +341,7 @@ card.addEventListener('click', e => {
 addEventListener('pageshow', e => {
   if (!e.persisted) return;
   $('veil').classList.remove('on');
-  books.forEach(b => b.classList.remove('opening', 'sel', 'nudge-l', 'nudge-r'));
+  books.forEach(b => { b.classList.remove('opening', 'lift', 'sel', 'nudge-l', 'nudge-r'); b.style.viewTransitionName = ''; });
 });
 
 /* ── the lamp follows you ── */

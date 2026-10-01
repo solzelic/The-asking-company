@@ -20,54 +20,72 @@ const url = new URL(b.href, SITE.url).href;
 const lum = (hex) => { const n = parseInt(hex.replace('#', '').padEnd(6, '0'), 16);
   return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
 const accent = lum(b.spine) < 0.55 ? b.spine : '#0f766e';
+// The bookplate: the same book, two-thirds size.
+const plate = { ...b, w: Math.max(26, Math.round(b.w * .72)), h: Math.round(b.h * .72) };
 ---
 <Library title={`${b.title.replace(/\.$/, '')} — Asking Company`} description={b.dek} tone="light"
   type="article" published={b.date.toISOString()} accent={accent} progress>
-  <article class="essay-page">
+  <Fragment slot="head">
+    <script is:inline>
+      /* Apply saved reader settings before first paint, so nothing flashes. */
+      try {
+        var s = JSON.parse(localStorage.getItem('ac-reader') || '{}'), h = document.documentElement;
+        if (s.font) h.dataset.font = s.font;
+        if (s.theme) h.dataset.theme = s.theme;
+        if (s.focus) h.dataset.focus = '';
+        if (s.fs) h.style.setProperty('--fs', s.fs);
+        if (s.lh) h.style.setProperty('--lh', s.lh);
+        if (s.mw) h.style.setProperty('--mw', s.mw);
+      } catch (e) {}
+    </script>
+  </Fragment>
+  <Fragment slot="bar">
+    <div class="bt" id="barTitle"><span class="plt"></span><span class="tt">{b.title}</span><span class="tm" id="remain"></span></div>
+  </Fragment>
+
+  <article class="essay-page" data-slug={b.slug} data-title={b.title} data-dek={b.dek} data-words={b.words} data-pagefind-body
+    data-pagefind-meta={`series:${b.seriesName}, date:${b.dateLabel}, minutes:${b.minutes}`}>
     <header class="ehead">
-      <div>
+      <div class="top" data-pagefind-ignore>
+        <a class="plate" href={`/writing?shelf=${b.series}`} style={`--pw:${plate.w}px;--ph:${plate.h}px`} aria-label="Back to the shelf">
+          <Book book={plate} vt still />
+        </a>
         <div class="crumbs">
-          <a href="/writing">The Library</a><span>·</span>
-          <a href={`/writing?shelf=${b.series}`}>{b.seriesName}</a><span>·</span>
-          <span>No. {b.no}</span>
-        </div>
-        <h1>{b.title}</h1>
-        <p class="dek">{b.dek}</p>
-        <div class="meta">
-          <time datetime={b.iso}>{b.dateLabel}</time>
-          <span>{b.words.toLocaleString('en-US')} words</span>
-          <span>{b.minutes} min read</span>
-          {b.company && <span class="letterhead">On company letterhead</span>}
+          <a href="/writing">The Library</a><span class="mut">/</span>
+          <a href={`/writing?shelf=${b.series}`}>{b.seriesName}</a><span class="mut">/</span>
+          <span class="mut">No. {b.no}</span>
         </div>
       </div>
-      <div class="standing" aria-hidden="true"><Book book={b} /></div>
+      <h1 data-pagefind-meta="title">{b.title}</h1>
+      <p class="dek">{b.dek}</p>
+      <div class="meta" data-pagefind-ignore>
+        <time datetime={b.iso}>{b.dateLabel}</time>
+        <span>{b.minutes} min read</span>
+        {b.company && <span class="letterhead">On company letterhead</span>}
+      </div>
+      <div class="rule"></div>
     </header>
 
-    <div class="prose">
+    <div class="prose" id="prose">
       <Content />
     </div>
 
-    <footer class="colophon">
+    <footer class="colophon" data-pagefind-ignore>
       <div class="fin" aria-hidden="true">❦</div>
-      <p>Filed {b.dateLabel} · {b.seriesName} · No. {b.no}</p>
+      <p>Filed {b.dateLabel} · {b.seriesName} · No. {b.no} · {b.words.toLocaleString('en-US')} words</p>
       {b.tags.length > 0 && (
         <div class="tags">{b.tags.map(t => <a href={`/writing?tag=${encodeURIComponent(t)}`}>{t}</a>)}</div>
       )}
-      <div class="share">
-        <button type="button" data-copy={url}>Copy link</button>
-        <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(b.title)}&url=${encodeURIComponent(url)}`} target="_blank" rel="noopener">Post</a>
-        <a href={`mailto:?subject=${encodeURIComponent(b.title)}&body=${encodeURIComponent(url)}`}>Email</a>
-      </div>
     </footer>
 
-    <nav class="enav" aria-label="More from the Library">
+    <nav class="enav" aria-label="More from the Library" data-pagefind-ignore>
       {prev ? <a href={prev.href}><div class="lab">← Earlier</div><div class="t">{prev.title}</div></a>
             : <div class="none"><div class="lab">← Earlier</div><div class="t">Nothing earlier</div></div>}
       {next ? <a class="nx" href={next.href}><div class="lab">Later →</div><div class="t">{next.title}</div></a>
             : <div class="nx none"><div class="lab">Later →</div><div class="t">Nothing later, yet</div></div>}
     </nav>
 
-    <section class="esub">
+    <section class="esub" data-pagefind-ignore>
       <h2>Be told when there is something new.</h2>
       <p>A handful of times a year. No schedule.</p>
       <form class="subf" data-subscribe="essay" data-done="You are on the list.">
@@ -77,13 +95,44 @@ const accent = lum(b.spine) < 0.55 ? b.spine : '#0f766e';
       </form>
     </section>
   </article>
-  <script>
-    document.addEventListener('click', e => {
-      const b = (e.target as HTMLElement).closest('[data-copy]') as HTMLElement | null;
-      if (!b) return;
-      navigator.clipboard?.writeText(b.dataset.copy || location.href).then(() => {
-        const t = b.textContent; b.textContent = 'Copied'; setTimeout(() => (b.textContent = t), 1600);
-      }).catch(() => {});
-    });
-  </script>
+
+  <aside class="rail" id="rail" aria-label="Progress"><div class="trk"></div><div class="fil"></div><div class="pct" id="pct">0%</div></aside>
+
+  <div class="tools" id="tools" role="toolbar" aria-label="Reading tools">
+    <button type="button" id="listenBtn" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      <span class="lbl">Listen</span>
+    </button>
+    <button type="button" id="aaBtn" aria-pressed="false" aria-controls="sheet" aria-label="Reading settings"><span class="aa">Aa</span></button>
+    <button type="button" id="shareBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6h14v-6"/></svg>
+      <span class="lbl">Share</span>
+    </button>
+  </div>
+
+  <div class="scrim2" id="scrim2"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-label="Reading settings" aria-hidden="true">
+    <div class="row"><span class="lab">Typeface</span></div>
+    <div class="fonts">
+      <button type="button" data-font="serif" aria-pressed="true"><span class="g">Aa</span><span class="n">Newsreader</span></button>
+      <button type="button" data-font="sans" aria-pressed="false"><span class="g">Aa</span><span class="n">Inter</span></button>
+      <button type="button" data-font="legible" aria-pressed="false"><span class="g">Aa</span><span class="n">Atkinson</span></button>
+      <button type="button" data-font="dyslexic" aria-pressed="false"><span class="g">Aa</span><span class="n">OpenDyslexic</span></button>
+    </div>
+    <div class="row"><span class="lab">Size</span>
+      <span class="step"><button type="button" data-fs="-0.1" aria-label="Smaller"><span class="s">A</span></button><span class="v" id="fsVal">100%</span><button type="button" data-fs="0.1" aria-label="Larger"><span class="l">A</span></button></span></div>
+    <div class="row"><span class="lab">Spacing</span>
+      <span class="seg2"><button type="button" data-lh="1.5">Tight</button><button type="button" data-lh="1.68">Normal</button><button type="button" data-lh="1.95">Loose</button></span></div>
+    <div class="row"><span class="lab">Width</span>
+      <span class="seg2"><button type="button" data-mw="0.82">Narrow</button><button type="button" data-mw="1">Normal</button><button type="button" data-mw="1.22">Wide</button></span></div>
+    <div class="row"><span class="lab">Theme</span>
+      <span class="themes"><button type="button" data-theme="paper" aria-label="Paper"></button><button type="button" data-theme="sepia" aria-label="Sepia"></button><button type="button" data-theme="night" aria-label="Night"></button></span></div>
+    <div class="row"><label class="lab" for="focusSw">Focus mode</label><input class="sw" type="checkbox" id="focusSw"></div>
+    <button type="button" class="reset" data-reset>Reset to defaults</button>
+  </div>
+
+  <div class="qpop" id="qpop"><button type="button" id="qCopy">Copy quote</button><button type="button" id="qPost">Post</button></div>
+  <div class="toast" id="toast" role="status"><span class="msg"></span><button type="button" class="go">Resume</button><button type="button" class="x" aria-label="Dismiss">×</button></div>
+
+  <script>import '../../scripts/reader.js';</script>
 </Library>

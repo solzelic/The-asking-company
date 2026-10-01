@@ -118,3 +118,7 @@
   margin-top:calc(var(--row) - var(--plank) - 6px - 64px);margin-bottom:var(--plank);
   background:linear-gradient(90deg,#8a6f35,#d4b46c 40%,#9a7c3e);border-radius:2px 2px 0 0;
   box-shadow:0 0 0 1px rgba(0,0,0,.3),6px 6px 12px rgba(0,0,0,.45)}
+
+/* lifted: pulled straight out and squared up, ready to fly to the essay */
+.bk.lift{z-index:40;transform:none}
+.bk.lift .bk-3d{transform:translateY(-10px) translateZ(60px) rotateY(-64deg);transition:transform .2s}
