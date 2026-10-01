@@ -239,12 +239,12 @@ $('sort').addEventListener('change', e => { S.sort = e.target.value; apply(); })
 $('planned').addEventListener('change', e => { S.planned = e.target.checked; apply(); });
 
 /* ── the catalogue card ── */
-let cardFor = null, hideT;
+let cardFor = null, hideT, cardLock = false;
 const seriesOf = b => document.querySelector(`[data-group="${b.dataset.series}"] h2`)?.textContent || '';
 const esc = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function showCard(b){
   clearTimeout(hideT);
-  if (cardFor === b) return;
+  if (cardLock || cardFor === b) return;
   const d = b.dataset, planned = b.hasAttribute('data-planned');
   const cs = getComputedStyle(b);
   card.innerHTML =
@@ -324,6 +324,7 @@ function open(b, e){
   if (reduced){ location.href = href; return; }
   opening = true;
   hideCard(true);
+  try { sessionStorage.setItem('ac-shelf-y', String(scrollY)); } catch {}
   const r = b.getBoundingClientRect();
   const w = cssPx(b, '--w'), h = cssPx(b, '--h');
   const wrap = document.createElement('div');
@@ -446,9 +447,19 @@ function landBook(){
   if (!b || reduced) return;
   b.style.animation = 'none';
   b.style.visibility = 'hidden';
-  b.closest('.case')?.scrollIntoView({ block: 'center', behavior: 'instant' });
-  const r = b.getBoundingClientRect();
+  cardLock = true; hideCard(true);
+  // Put the page back where it was when the book was taken. If its slot
+  // is not on screen from there, the page glides to it during the flight.
+  let y0 = scrollY;
+  try { const saved = sessionStorage.getItem('ac-shelf-y'); if (saved !== null){ y0 = +saved; sessionStorage.removeItem('ac-shelf-y'); } } catch {}
+  scrollTo(0, y0);
+  const r0 = b.getBoundingClientRect();
+  const slotDocTop = r0.top + y0;
   const w = cssPx(b, '--w'), h = cssPx(b, '--h');
+  const maxY = document.documentElement.scrollHeight - innerHeight;
+  let y1 = y0;
+  if (r0.top < 90 || r0.bottom > innerHeight - 40) y1 = Math.max(0, Math.min(maxY, slotDocTop - innerHeight * .55 + h / 2));
+  const r = { left: r0.left, top: slotDocTop - y1 };                      // the slot, where it will be when we arrive
   const S = Math.min(innerHeight * .46, 380) / h;
   const wrap = document.createElement('div');
   wrap.className = 'flywrap';
@@ -463,20 +474,28 @@ function landBook(){
   document.body.appendChild(wrap);
   const inner = fly.querySelector('.bk-3d');
   const dx = (r.left + w / 2) - innerWidth / 2, dy = (r.top + h / 2) - innerHeight / 2;
-  const ease = 'cubic-bezier(.25,.8,.25,1)';
+  const D = 680, ease = 'cubic-bezier(.3,.7,.2,1)';
   const flight = fly.animate([
-    { transform: `translate(0,0) scale(${S})` },
-    { transform: `translate(${dx * .6}px,${dy * .55 - 40}px) scale(${1 + (S - 1) * .45})`, offset: .5 },
-    { transform: `translate(${dx}px,${dy}px) scale(1)` },
-  ], { duration: 620, easing: ease, fill: 'forwards' });
-  inner.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], { duration: 620, easing: ease, fill: 'forwards' });
+    { transform: `translate(0,0) scale(${S}) rotate(0deg)` },
+    { transform: `translate(${dx * .55}px,${dy * .45 - 50}px) scale(${1 + (S - 1) * .45}) rotate(${dx > 0 ? -5 : 5}deg)`, offset: .5 },
+    { transform: `translate(${dx}px,${dy}px) scale(1) rotate(0deg)` },
+  ], { duration: D, easing: ease, fill: 'forwards' });
+  inner.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], { duration: D, easing: ease, fill: 'forwards' });
+  // the page glides so that the slot is exactly where the book lands
+  if (y1 !== y0){
+    const t0 = performance.now();
+    const bez = t => 1 - Math.pow(1 - t, 3);                              // ease-out, finishes with the flight
+    const step = now => { const t = Math.min(1, (now - t0) / D); scrollTo(0, y0 + (y1 - y0) * bez(t)); if (t < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
   flight.finished.then(() => {
     b.style.visibility = '';
     wrap.remove();
     // a small settle as it takes its place
     b.animate([{ transform: 'translateY(-6px) rotate(var(--lean))' }, { transform: 'translateY(0) rotate(var(--lean))' }],
       { duration: 420, easing: 'cubic-bezier(.2,1.4,.4,1)' });
-  }).catch(() => { b.style.visibility = ''; wrap.remove(); });
+    setTimeout(() => { cardLock = false; }, 500);
+  }).catch(() => { b.style.visibility = ''; wrap.remove(); cardLock = false; });
   document.documentElement.classList.remove('landing');
   return true;
 }
