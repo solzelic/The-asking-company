@@ -1,0 +1,91 @@
+---
+import Company from '../layouts/Company.astro';
+---
+<Company title="Filings — Asking Company" description="Quarterly results, memoranda and the founder log. Unaudited. There is nobody to audit them and nothing to audit." page="filings">
+
+  <div class="note">
+    <span class="corner tr">$1</span><span class="corner bl">$1</span>
+    <span class="eyebrow">Investor Relations</span>
+    <h2 style="font-size:clamp(32px,6.4vw,54px)">Filings.</h2>
+    <p class="dim">Unaudited. There is nobody to audit them and nothing to audit.</p>
+  </div>
+
+  <section class="blk">
+    <span class="eyebrow">Q1 2026 Results</span>
+    <div class="grid g2" style="margin-bottom:22px">
+      <div class="tile"><div class="k">Revenue</div><div class="v">$149</div><div class="n">Across 15 transactions.</div></div>
+      <div class="tile"><div class="k">Guidance</div><div class="v">$12</div><div class="n">We beat estimates by 1,142%.</div></div>
+      <div class="tile"><div class="k">Marketing spend</div><div class="v">$0</div><div class="n">The bit is the marketing.</div></div>
+      <div class="tile"><div class="k">Headcount</div><div class="v">1</div><div class="n">Management is also the only employee.</div></div>
+    </div>
+    <div class="panel">
+      <table class="tbl">
+        <tr><td>Revenue</td><td class="r">$149</td></tr>
+        <tr><td>Transactions</td><td class="r">15</td></tr>
+        <tr><td>Average transaction</td><td class="r">$9.93</td></tr>
+        <tr><td>Operating expense</td><td class="r">($200)</td></tr>
+        <tr class="tot"><td>Net</td><td class="r">($51)</td></tr>
+      </table>
+      <p class="tiny">The loss of $51 is entirely attributable to two domain registrations.
+        Guidance for Q2 is $150 to $4,000,000,000. The range is wide because conditions are
+        uncertain. Management remains bullish.</p>
+    </div>
+  </section>
+
+  <section class="blk">
+    <span class="eyebrow">Selected Communications</span>
+    <h2>Memoranda and the founder log.</h2>
+    <p class="dim" style="margin-bottom:6px">Published whenever something happens, which is rarely.</p>
+
+
+    <article class="post">
+      <div style="margin-bottom:10px"><span class="tag">Memorandum</span><span class="date">23 APR 2026</span></div>
+      <h3>Memo to all employees.</h3>
+      <p class="prev dim">Effective immediately, I am promoting myself to Chief Executive Officer. The previous Chief Executive Officer has been thanked for his service and will be staying on in a different capacity, which is this one.</p>
+      <div class="full">
+        <p class="dim">Effective immediately, I am promoting myself to Chief Executive Officer. The previous Chief Executive Officer has been thanked for his service and will be staying on in a different capacity, which is this one.</p>
+        <p class="dim">The new Chief Executive Officer's first executive order is to ask people for a dollar. His second is to keep asking. There is no third order at this time; the first two are considered sufficient.</p>
+        <p class="dim">All employees are encouraged to bring this energy to their own work.</p>
+      </div>
+      <button class="more" type="button" data-tog aria-expanded="false">Read the memorandum</button>
+    </article>
+
+    <article class="post">
+      <div style="margin-bottom:10px"><span class="tag">Founder log</span><span class="date">24 APR 2026</span></div>
+      <h3>Day one. Still not a billionaire.</h3>
+      <p class="prev dim">Woke up. Was not a billionaire. Brushed teeth. Was not a billionaire. Asked the AI to build the website. It did. The website asks people for one dollar.</p>
+      <div class="full">
+        <p class="dim">Woke up. Was not a billionaire.</p>
+        <p class="dim">Brushed teeth. Was not a billionaire.</p>
+        <p class="dim">Asked the AI to build the website. It did, in about four minutes, and it did not ask me a single question about whether this was a good idea. The website asks people for one dollar. I am not certain how I feel about how easy that was.</p>
+        <p class="dim">Will report back tomorrow.</p>
+      </div>
+      <button class="more" type="button" data-tog aria-expanded="false">Read the log</button>
+    </article>
+
+    <article class="post">
+      <div style="margin-bottom:10px"><span class="tag">All-hands</span><span class="date">22 APR 2026</span></div>
+      <h3>Vision, mission, and the next one hundred dollars.</h3>
+      <p class="prev dim">Good morning, team. As you all know, I am the team. Hello.</p>
+      <div class="full">
+        <p class="dim">Good morning, team. As you all know, I am the team. Hello.</p>
+        <p class="dim">Our vision is to become a billion-dollar company. Our mission is to ask. Our values are asking, continuing to ask, and not being embarrassed about either.</p>
+        <p class="dim">Looking ahead, we have several strategic priorities. One: keep asking. Two: ask more people. Three: revisit priority one to confirm we are still doing it. I have opened the floor to questions and nobody has raised a hand, which I am reading as alignment.</p>
+      </div>
+      <button class="more" type="button" data-tog aria-expanded="false">Read the transcript</button>
+    </article>
+  </section>
+
+</Company>
+
+<script>
+  /* Memoranda expand in place; the button reads "Collapse" while open. */
+  document.querySelectorAll<HTMLButtonElement>('.post [data-tog]').forEach(btn => {
+    const orig = btn.textContent || '';
+    btn.addEventListener('click', () => {
+      const on = btn.closest('.post')!.classList.toggle('on');
+      btn.textContent = on ? 'Collapse' : orig;
+      btn.setAttribute('aria-expanded', String(on));
+    });
+  });
+</script>

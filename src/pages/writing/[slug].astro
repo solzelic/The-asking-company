@@ -1,0 +1,89 @@
+---
+import { render } from 'astro:content';
+import Library from '../../layouts/Library.astro';
+import Book from '../../components/Book.astro';
+import { getBooks } from '../../lib/library.js';
+import { SITE } from '../../site.config.js';
+
+export async function getStaticPaths(){
+  const books = await getBooks();
+  return books.map((b, i) => ({
+    params: { slug: b.slug },
+    props: { b, prev: books[i - 1] || null, next: books[i + 1] || null },
+  }));
+}
+
+const { b, prev, next } = Astro.props;
+const { Content } = await render(b.entry);
+const url = new URL(b.href, SITE.url).href;
+// Accent: the book's cloth, unless it is too pale to read on paper.
+const lum = (hex) => { const n = parseInt(hex.replace('#', '').padEnd(6, '0'), 16);
+  return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+const accent = lum(b.spine) < 0.55 ? b.spine : '#0f766e';
+---
+<Library title={`${b.title.replace(/\.$/, '')} — Asking Company`} description={b.dek} tone="light"
+  type="article" published={b.date.toISOString()} accent={accent} progress>
+  <article class="essay-page">
+    <header class="ehead">
+      <div>
+        <div class="crumbs">
+          <a href="/writing">The Library</a><span>·</span>
+          <a href={`/writing?shelf=${b.series}`}>{b.seriesName}</a><span>·</span>
+          <span>No. {b.no}</span>
+        </div>
+        <h1>{b.title}</h1>
+        <p class="dek">{b.dek}</p>
+        <div class="meta">
+          <time datetime={b.iso}>{b.dateLabel}</time>
+          <span>{b.words.toLocaleString('en-US')} words</span>
+          <span>{b.minutes} min read</span>
+          {b.company && <span class="letterhead">On company letterhead</span>}
+        </div>
+      </div>
+      <div class="standing" aria-hidden="true"><Book book={b} /></div>
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <footer class="colophon">
+      <div class="fin" aria-hidden="true">❦</div>
+      <p>Filed {b.dateLabel} · {b.seriesName} · No. {b.no}</p>
+      {b.tags.length > 0 && (
+        <div class="tags">{b.tags.map(t => <a href={`/writing?tag=${encodeURIComponent(t)}`}>{t}</a>)}</div>
+      )}
+      <div class="share">
+        <button type="button" data-copy={url}>Copy link</button>
+        <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(b.title)}&url=${encodeURIComponent(url)}`} target="_blank" rel="noopener">Post</a>
+        <a href={`mailto:?subject=${encodeURIComponent(b.title)}&body=${encodeURIComponent(url)}`}>Email</a>
+      </div>
+    </footer>
+
+    <nav class="enav" aria-label="More from the Library">
+      {prev ? <a href={prev.href}><div class="lab">← Earlier</div><div class="t">{prev.title}</div></a>
+            : <div class="none"><div class="lab">← Earlier</div><div class="t">Nothing earlier</div></div>}
+      {next ? <a class="nx" href={next.href}><div class="lab">Later →</div><div class="t">{next.title}</div></a>
+            : <div class="nx none"><div class="lab">Later →</div><div class="t">Nothing later, yet</div></div>}
+    </nav>
+
+    <section class="esub">
+      <h2>Be told when there is something new.</h2>
+      <p>A handful of times a year. No schedule.</p>
+      <form class="subf" data-subscribe="essay" data-done="You are on the list.">
+        <input type="email" required placeholder="you@example.com" autocomplete="email" aria-label="Email address">
+        <input type="hidden" name="writings" value="1">
+        <button type="submit">Notify me</button>
+      </form>
+    </section>
+  </article>
+  <script>
+    document.addEventListener('click', e => {
+      const b = (e.target as HTMLElement).closest('[data-copy]') as HTMLElement | null;
+      if (!b) return;
+      navigator.clipboard?.writeText(b.dataset.copy || location.href).then(() => {
+        const t = b.textContent; b.textContent = 'Copied'; setTimeout(() => (b.textContent = t), 1600);
+      }).catch(() => {});
+    });
+  </script>
+</Library>

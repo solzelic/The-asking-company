@@ -1,0 +1,168 @@
+---
+import Company from '../layouts/Company.astro';
+import Book from '../components/Book.astro';
+import { getBooks } from '../lib/library.js';
+import { SEED } from '../data/seed.js';
+import '../styles/book.css';
+
+const books = (await getBooks()).slice(-6).reverse();
+const total = SEED.reduce((s, d) => s + d.amount, 0);
+const top = SEED.slice().sort((a, b) => b.amount - a.amount).slice(0, 15);
+const pct = (total / 1e9) * 100;
+---
+<Company title="Asking Company — Give me one dollar." page="home" closer={false}>
+  <div class="note hero" style="text-align:center">
+    <span class="corner tr">$1</span><span class="corner bl">$1</span>
+    <span class="eyebrow">The first one-person billion-dollar company in AI</span>
+    <h1 id="askH">Give me<br>one dollar.</h1>
+    <p class="lede narrow dim" id="askS" style="margin-top:28px">
+      I am not sick. I am not poor. Nothing is wrong. I want one dollar.
+      From you. From everyone. That is the entire company.
+    </p>
+    <div style="margin-top:38px">
+      <button class="btn" id="askBtn" data-ask="1">Give me one dollar</button>
+      <p class="tiny" id="askF">One dollar. That's it.</p>
+    </div>
+    <div class="langrow">
+      <select class="lang" id="langAsk" aria-label="Language of the ask"></select>
+      <p class="tiny" id="askE">The ask is in 112 languages. The rest of the site is in English, which is the language the founder knows.</p>
+    </div>
+  </div>
+
+  <div class="counter">
+    <div class="big" id="total">${total.toLocaleString('en-US')}</div>
+    <p class="faint" id="totalCap" style="margin-top:10px;font-size:15px">raised from {SEED.length} people</p>
+    <div class="track"><i id="fill" style={`width:${Math.max(0.4, pct)}%`}></i></div>
+    <div class="trackrow"><span>$0</span><span id="pct">{pct.toFixed(7)}%</span><span>$1,000,000,000</span></div>
+  </div>
+
+  <section class="blk">
+    <span class="eyebrow">The Ledger</span>
+    <h2>Everyone who has given.</h2>
+    <div class="panel"><table class="tbl"><tbody id="ledger">
+      {top.map((d, i) => <tr><td class="i">{i + 1}</td><td>{d.name}</td><td class="r">${d.amount.toLocaleString('en-US')}</td></tr>)}
+    </tbody></table></div>
+    <p class="tiny" style="text-align:center">Names are supplied by the giver and are not verified in any way.</p>
+  </section>
+
+  <section class="blk">
+    <span class="eyebrow">The Company</span>
+    <h2>Everything else is paperwork.</h2>
+    <div class="grid g3 doors">
+      <a class="tile" href="/prospectus"><div class="k">White paper</div><div class="v">Prospectus</div><div class="n">The case for the business, made seriously. Risk factors disclosed in full.</div></a>
+      <a class="tile" href="/filings"><div class="k">Investor relations</div><div class="v">Filings</div><div class="n">Q1 results. We beat guidance by 1,142%. Memoranda from management.</div></a>
+      <a class="tile" href="/legal"><div class="k">Schedule A</div><div class="v">Structure</div><div class="n">Each company owns the other. Counsel raised this after execution.</div></a>
+    </div>
+  </section>
+
+  {books.length > 0 && (
+    <section class="blk libdoor">
+      <div class="libdoor-in">
+        <div class="libdoor-copy">
+          <span class="eyebrow" style="color:#c9a961">The Library</span>
+          <h2>The founder also writes.</h2>
+          <p>Behind the company there is a room with books in it. Longer pieces, some for the company and most for their own sake.</p>
+          <a class="enter" href="/writing">Enter the Library &rarr;</a>
+        </div>
+        <div class="case mini">
+          {books.map((b, i) => <Book book={b} i={i} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="blk">
+    <div class="nl">
+      <div class="nl-head"><span>Notifications</span><span>Two events, ever</span></div>
+      <div class="nl-body">
+        <h3>We will write to you twice.</h3>
+        <p class="dim">Once when there is something new to read, and once when we reach one billion dollars. The second is expected to take longer.</p>
+        <form data-subscribe="home" data-done="<h3>You are on the list.</h3><p class='dim'>You have also been appointed <b>{role}</b>, effective immediately. The appointment was not offered and cannot be declined. <a href='/careers'>See Careers</a>.</p>">
+          <input type="email" required placeholder="you@example.com" autocomplete="email" aria-label="Email address">
+          <button class="btn" type="submit">Notify me</button>
+          <div class="nl-opts">
+            <label class="nl-opt"><input type="checkbox" name="writings" checked><span><b>New writings.</b> A handful a year, if that.</span></label>
+            <label class="nl-opt"><input type="checkbox" name="billion" checked><span><b>The billion.</b> One email. Ever. Conditional on an event that has not yet occurred and may not.</span></label>
+          </div>
+        </form>
+        <p class="tiny">We will not sell your address. There is nobody to sell it to and we have not been approached.</p>
+      </div>
+    </div>
+  </section>
+
+  <style is:global>
+    .doors .tile{text-decoration:none;color:inherit;display:block}
+    .doors .tile .v{font-size:24px}
+    .libdoor{border-top:0}
+    .libdoor-in{background:#14110c;color:#efe9da;border-radius:3px;border:2px solid var(--ink);
+      box-shadow:8px 8px 0 #0f766e;padding:34px 30px 30px;display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:30px;align-items:end;overflow:hidden;
+      background-image:radial-gradient(600px 300px at 80% 0%,rgba(255,214,150,.12),transparent 70%)}
+    .libdoor h2{color:#efe9da;font-family:'Newsreader Variable',var(--display);font-weight:500;letter-spacing:-.02em}
+    .libdoor p{color:#b5ad9b;font-family:'Newsreader Variable',var(--display);font-style:italic;font-size:18px;line-height:1.5}
+    .libdoor .enter{display:inline-block;margin-top:8px;color:#efe9da;text-decoration:none;border-bottom:1px solid #c9a961;
+      font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;padding-bottom:3px}
+    .libdoor .enter:hover{color:#c9a961}
+    .case.mini{--row:270px;padding:4px 22px 0;justify-content:flex-start}
+    @media (max-width:720px){ .libdoor-in{grid-template-columns:1fr;padding:26px 18px 20px} }
+    .nl form{flex-wrap:wrap}
+    .nl form .nl-opts{flex:1 1 100%}
+    .sub-done{text-align:center;padding:10px 0}
+  </style>
+
+  <script>
+    import { L } from '../data/langs.js';
+    import { $, money, esc } from '../scripts/shared.js';
+
+    /* ── the ask, in 112 languages ── */
+    let total = Number($('total').textContent.replace(/[^0-9]/g, '')) || 0;
+    let givers = $('ledger').children.length;
+    let lang = 'en';
+    const hero = document.querySelector('.hero') as HTMLElement;
+    const sel = $('langAsk') as HTMLSelectElement;
+    sel.innerHTML = Object.keys(L).sort((a, b) => (a === 'en' ? -1 : b === 'en' ? 1 : L[a].n.localeCompare(L[b].n)))
+      .map(c => `<option value="${c}">${esc(L[c].n)}</option>`).join('');
+
+    function setLang(code: string){
+      if (!L[code]) code = 'en';
+      lang = code;
+      const t = L[code];
+      $('askH').innerHTML = code === 'en' ? 'Give me<br>one dollar.' : esc(t.h);
+      $('askS').textContent = t.s;
+      $('askBtn').textContent = t.b;
+      $('askF').textContent = t.f;
+      $('askE').textContent = t.e;
+      hero.classList.toggle('i18n', /[^\u0000-ɏḀ-ỿ -⁯]/.test(t.h));
+      hero.lang = code;
+      t.rtl ? hero.setAttribute('dir', 'rtl') : hero.removeAttribute('dir');
+      sel.value = code;
+      document.documentElement.dataset.askLang = code;
+      renderCount();
+    }
+    sel.addEventListener('change', () => setLang(sel.value));
+    const pref = (navigator.languages || [navigator.language || 'en']).map(x => String(x).toLowerCase());
+    setLang(pref.map(p => (L[p] ? p : p.split('-')[0])).find(p => L[p]) || 'en');
+
+    /* ── the counter and the ledger, from the live database ── */
+    function localNum(n: number){ try { return n.toLocaleString(lang); } catch { return n.toLocaleString('en-US'); } }
+    function renderCount(){
+      $('total').textContent = money(total);
+      $('totalCap').textContent = lang === 'en'
+        ? 'raised from ' + givers.toLocaleString('en-US') + (givers === 1 ? ' person' : ' people')
+        : L[lang].r.replace('{n}', localNum(givers));
+      const pct = (total / 1e9) * 100;
+      $('pct').textContent = pct < 0.0001 ? pct.toFixed(7) + '%' : pct.toFixed(4) + '%';
+      ($('fill') as HTMLElement).style.width = Math.max(0.4, Math.min(100, pct)) + '%';
+    }
+    fetch('/api/stats').then(r => (r.ok ? r.json() : null)).then(s => {
+      if (!s || typeof s.total !== 'number') return;
+      total = s.total; givers = s.givers;
+      renderCount();
+      if (Array.isArray(s.ledger) && s.ledger.length){
+        $('ledger').innerHTML = s.ledger.map((d: any, i: number) =>
+          `<tr><td class="i">${i + 1}</td><td>${esc(d.name)}</td><td class="r">${money(d.amount)}</td></tr>`).join('');
+      }
+    }).catch(() => {});
+  </script>
+  <script>import '../scripts/subscribe.js';</script>
+</Company>

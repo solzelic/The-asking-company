@@ -1,0 +1,178 @@
+---
+import Company from '../layouts/Company.astro';
+import { SITE } from '../site.config.js';
+const mail = `mailto:${SITE.email}`;
+---
+<Company title="Terms of Sale & Refunds — Asking Company" description="Terms of sale, refund policy and privacy notice for Asking Company. What you buy, what it costs, how refunds work, and what we store." page="legal">
+
+  <div class="note" style="--corner:'§'">
+    <span class="corner tr">&sect;</span><span class="corner bl">&sect;</span>
+    <span class="eyebrow">Terms of Sale</span>
+    <h2 style="font-size:clamp(32px,6.4vw,54px)">Terms of Sale<br>&amp; Refunds.</h2>
+    <p class="dim">The rest of this website is a joke. This page is not. It sets out plainly
+      what you are paying for, how to get your money back, and what we keep.</p>
+    <p class="tiny" style="margin-top:18px">Last updated 1 October 2026</p>
+  </div>
+
+  <div class="terms">
+
+    <section class="blk">
+      <span class="eyebrow">1 &middot; Who we are</span>
+      <div class="panel">
+        <p>This website is operated by <b>Asking Company</b>, based in {SITE.city}.
+          In these terms, "we", "us" and "our" mean Asking Company, and "you" means the person
+          making a payment.</p>
+        <p>You can contact us at any time by email: <a href={mail}>{SITE.email}</a>.</p>
+      </div>
+    </section>
+
+    <section class="blk">
+      <span class="eyebrow">2 &middot; What you are buying</span>
+      <div class="panel">
+        <p>When you make a payment on this website you are buying one <b>Certificate of
+          Nothing</b>: a digital certificate recording your payment, the amount paid, and your
+          giver number (your position in the sequence of everyone who has paid).</p>
+        <ul>
+          <li>The certificate is delivered <b>immediately on screen</b> once your payment is
+            complete, and you can download it as an image file.</li>
+          <li>Nothing physical is shipped. No further goods, services, rights or benefits are
+            provided or promised.</li>
+          <li>The certificate is a novelty item. It does not represent ownership of anything.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="blk">
+      <span class="eyebrow">3 &middot; Price and payment</span>
+      <div class="panel">
+        <ul>
+          <li>Prices start from <b>US$1</b>. The exact amount is always shown to you
+            <b>before</b> you pay.</li>
+          <li>You may choose to pay more than US$1 by accepting the optional prompts that offer
+            to double the amount. You are never required to pay more than the amount you
+            confirm.</li>
+          <li>Payments are processed by <b>Stripe</b>. Your card details are entered into
+            Stripe's secure payment form and are handled by Stripe, not by us. <b>We do not see
+            or store your card details.</b></li>
+          <li>Each payment is a single, one-time charge. There are no subscriptions and no
+            recurring charges.</li>
+          <li>Your bank or card issuer may charge its own fees (for example, currency conversion
+            fees). Those are outside our control.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="blk">
+      <span class="eyebrow">4 &middot; Refunds</span>
+      <div class="panel spot">
+        <p class="lede" style="margin-bottom:14px"><b>If you want your money back, you can have it.</b></p>
+        <ul>
+          <li>Email <a href={mail}>{SITE.email}</a> within <b>30 days</b> of your payment.</li>
+          <li>Include your receipt (or the email address you paid with, the date and the
+            amount) so we can find the payment.</li>
+          <li>We will refund the <b>full amount</b> to your original payment method.
+            <b>No questions asked.</b></li>
+          <li>Refunds are issued through Stripe. They usually appear on your statement within
+            5&ndash;10 business days, depending on your bank.</li>
+        </ul>
+        <p class="dim" style="margin-top:14px">If something has gone wrong with a payment &mdash;
+          a duplicate charge, an amount you did not intend, or a charge you do not recognise
+          &mdash; please email us first. We will sort it out.</p>
+      </div>
+    </section>
+
+    <section class="blk">
+      <span class="eyebrow">5 &middot; The public ledger</span>
+      <div class="panel">
+        <ul>
+          <li>After paying you may choose to add a name to the public ledger on the home page.
+            This is <b>optional</b>. If you leave it blank, no name is shown.</li>
+          <li>The name you choose must not be offensive and must not impersonate another person
+            or organisation.</li>
+          <li>We may edit or remove any name from the public ledger at our discretion, at any
+            time, without notice. Removing a name does not affect your payment or your
+            certificate.</li>
+          <li>If you would like your name removed, email us and we will remove it.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="blk">
+      <span class="eyebrow">6 &middot; Privacy</span>
+      <div class="panel">
+        <p>For each payment we store:</p>
+        <ul>
+          <li>the name you chose for the ledger, if any;</li>
+          <li>the amount paid;</li>
+          <li>the date of payment; and</li>
+          <li>Stripe's payment reference, so that we can find the payment for refunds and
+            enquiries.</li>
+        </ul>
+        <p>Stripe processes your payment details (including your card and email address) under
+          its own privacy policy.</p>
+        <p>We only send you emails if you choose to subscribe to them, and you can unsubscribe
+          at any time. <b>We do not sell or rent your data</b> to anyone.</p>
+        <p>To ask what we hold about you, or to have it deleted (subject to any records we are
+          legally required to keep), email <a href={mail}>{SITE.email}</a>.</p>
+      </div>
+    </section>
+
+    <section class="blk">
+      <span class="eyebrow">7 &middot; What this is not</span>
+      <div class="panel">
+        <p>A payment on this website is a purchase of a novelty digital certificate and
+          nothing else. It is <b>not</b>:</p>
+        <ul>
+          <li>a security, share, equity, token or ownership interest of any kind;</li>
+          <li>an investment or a loan, and it carries no expectation of any return; or</li>
+          <li>a donation to a registered charity, and it is not tax deductible.</li>
+        </ul>
+        <p>Asking Company is a satirical project. The company figures, staff, corporate
+          structure and other material elsewhere on this site are written as satire. See the
+          <a href="#disclaimer">satire disclaimer</a> below.</p>
+      </div>
+    </section>
+
+    <section class="blk">
+      <span class="eyebrow">8 &middot; Governing law</span>
+      <div class="panel">
+        <p>These terms are governed by the laws of the Province of Ontario and the federal laws
+          of Canada applicable there. Nothing in these terms limits any rights you have under
+          consumer protection law that cannot be excluded by agreement.</p>
+        <p>We may update these terms from time to time. The version in force when you make a
+          payment applies to that payment.</p>
+      </div>
+    </section>
+
+    <section class="blk" id="disclaimer">
+      <span class="eyebrow">Satire disclaimer</span>
+      <div class="panel">
+        <p class="dim">Asking Company is a satirical project. Nothing on this site is an offer to
+          sell or a solicitation of an offer to buy any security, and no security, equity, share,
+          unit, token, or ownership interest of any kind exists or is contemplated. Financial
+          figures quoted elsewhere on the site are real but trivial; forward-looking statements
+          are almost certainly false. Persons named as employees do not work here and have not
+          been contacted. None of this affects your rights under these terms: the price, the
+          certificate, the refund policy and the privacy commitments above are meant exactly
+          as written.</p>
+      </div>
+    </section>
+
+    <section class="blk">
+      <div class="panel narrow" style="text-align:center">
+        <p><b>Questions about any of this?</b></p>
+        <p class="dim" style="font-size:15px">Email <a href={mail}>{SITE.email}</a>. A real
+          person reads it.</p>
+      </div>
+    </section>
+
+  </div>
+
+</Company>
+
+<style is:global>
+  .terms .panel{font-size:16px;line-height:1.65}
+  .terms .panel ul{margin:0 0 16px;padding-left:22px}
+  .terms .panel ul:last-child{margin-bottom:0}
+  .terms .panel li{margin-bottom:8px}
+</style>

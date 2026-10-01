@@ -1,0 +1,19 @@
+# Cloudflare Pages project. See README.md → "Deploying" for the full walkthrough.
+name = "the-asking-company"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-09-01"
+
+[vars]
+CURRENCY = "usd"
+# Comma-separated words that turn a ledger name into "Anonymous".
+BLOCKED_WORDS = ""
+
+[[d1_databases]]
+binding = "DB"
+database_name = "asking-company"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+# Secrets (never commit these; set them with wrangler or the dashboard):
+#   STRIPE_SECRET_KEY      sk_live_… or sk_test_…
+#   STRIPE_WEBHOOK_SECRET  whsec_…

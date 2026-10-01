@@ -1,0 +1,133 @@
+---
+/* Stripe sends givers here after paying: /thanks?session_id=cs_… */
+import Company from '../layouts/Company.astro';
+import { SITE } from '../site.config.js';
+---
+<Company title="Received — Asking Company" page="home" closer={false}>
+  <meta name="robots" content="noindex" slot="head" />
+  <div class="note" style="text-align:center" id="stage">
+    <span class="corner tr">$1</span><span class="corner bl">$1</span>
+    <span class="eyebrow">Confirming</span>
+    <h2>Checking with the bank.</h2>
+    <p class="dim">This takes a moment. The bank is larger than we are.</p>
+  </div>
+
+  <div id="after" hidden>
+    <section class="blk" style="border-top:0;padding-top:0">
+      <div class="certwrap" id="cert"></div>
+      <p class="tiny" style="text-align:center;margin-top:16px">Screenshot it. Post it. That is the only distribution channel we have.</p>
+      <div class="sharerow" style="max-width:560px;margin:14px auto 0">
+        <button data-act="download">Download</button>
+        <button data-share="x">Post to X</button>
+        <button data-share="linkedin">LinkedIn</button>
+        <button data-share="whatsapp">WhatsApp</button>
+        <button data-share="copy" id="copyBtn">Copy link</button>
+      </div>
+    </section>
+
+    <section class="blk">
+      <div class="panel spot narrow" style="text-align:center">
+        <span class="eyebrow" style="margin-bottom:12px">An offer</span>
+        <p class="lede" id="ladderLine" style="margin-bottom:22px"></p>
+        <div class="row" style="max-width:420px;margin:0 auto">
+          <a class="btn sm ghost" href="/" style="text-decoration:none;text-align:center">I am done</a>
+          <button class="btn sm" id="ladderBtn" data-ask="2">Give $2</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="blk">
+      <div class="nl">
+        <div class="nl-head"><span>Oversight</span><span>Noted after the fact</span></div>
+        <div class="nl-body">
+          <h3>We forgot to ask for your email.</h3>
+          <p class="dim">We have your dollar. We have your name. We have no way of contacting you about either. If you would like to be told when we reach one billion dollars, we will need somewhere to send that.</p>
+          <form data-subscribe="post-gift" data-done="<h3>Recorded.</h3><p class='dim'>You will hear from us twice. You have also been appointed <b>{role}</b>, which was not part of the arrangement you agreed to. <a href='/careers'>See Careers</a>.</p>">
+            <input type="email" required placeholder="you@example.com" autocomplete="email" aria-label="Email address">
+            <input type="hidden" name="writings" value="1"><input type="hidden" name="billion" value="1">
+            <button class="btn" type="submit">Send</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <style is:global>
+    .certwrap svg{width:100%;height:auto;display:block}
+    #after .row .btn{margin:0;flex:1}
+    .sub-done{text-align:center}
+  </style>
+
+  <script define:vars={{ email: SITE.email, site: SITE.url }}>
+    window.__AC = { email, site };
+  </script>
+  <script>
+    import { $, money, esc, ladderLine, burst, ACTIONS } from '../scripts/shared.js';
+    import { certSVG, downloadCert } from '../scripts/certificate.js';
+    import '../scripts/subscribe.js';
+
+    const { email, site } = (window as any).__AC;
+    const id = new URLSearchParams(location.search).get('session_id') || '';
+    const stage = $('stage');
+    let cert = { svg: '', number: 0, amount: 1 };
+    let shareText = 'give this company one dollar';
+
+    function fail(msg: string){
+      stage.innerHTML = '<span class="corner tr">$1</span><span class="corner bl">$1</span>' +
+        '<span class="eyebrow">Unconfirmed</span><h2>We could not find that payment.</h2>' +
+        '<p class="dim">' + msg + '</p><p class="dim">If you were charged, email <a href="mailto:' +
+        esc(email) + '">' + esc(email) + '</a> and a member of the team will sort it out. There is one member of the team.</p>' +
+        '<div style="margin-top:24px"><a class="btn" href="/" style="text-decoration:none;text-align:center">Back to the ask</a></div>';
+    }
+
+    function show(d: any){
+      const n = Number(d.giver), amount = Number(d.amount);
+      const when = d.date ? new Date(d.date.replace(' ', 'T') + 'Z') : new Date();
+      cert = { svg: certSVG(d.name || 'Anonymous', amount, n, when), number: n, amount };
+      shareText = 'i am giver no. ' + n.toLocaleString('en-US') + ' of 1,000,000,000 at asking company. i gave ' +
+        money(amount) + ' and received nothing. i have a certificate that says so.';
+      stage.innerHTML = '<span class="corner tr">$1</span><span class="corner bl">$1</span>' +
+        '<span class="eyebrow">Received</span><h2>' + money(amount) + ' received.</h2>' +
+        '<p class="dim">' + (d.name && d.name !== 'Anonymous' ? esc(d.name) + ' is on the ledger. ' : '') +
+        'That is ' + ((amount / 1e9) * 100).toFixed(7) + '% of a billion dollars. It is more than most people give, which is nothing.</p>';
+      $('cert').innerHTML = cert.svg;
+      const next = amount * 2;
+      $('ladderLine').textContent = ladderLine(next);
+      const lb = $('ladderBtn');
+      lb.dataset.ask = String(next);
+      lb.textContent = 'Give ' + money(next);
+      if (next > 524288) lb.closest('section')!.hidden = true;
+      $('after').hidden = false;
+      burst();
+    }
+
+    async function confirm(tries = 0){
+      if (!id) return fail('There is no payment reference in this link.');
+      try {
+        const r = await fetch('/api/session?id=' + encodeURIComponent(id));
+        const d = await r.json().catch(() => ({}));
+        if (r.ok && d.status === 'paid') return show(d);
+        if (r.status === 202 && tries < 8) return setTimeout(() => confirm(tries + 1), 1500);
+        fail(r.status === 202 ? 'The bank has not confirmed it yet. It may still arrive.' : 'The reference did not match anything.');
+      } catch { fail('The connection dropped before the bank answered.'); }
+    }
+    confirm();
+
+    ACTIONS.download = () => cert.svg && downloadCert(cert.svg, cert.number);
+    document.addEventListener('click', e => {
+      const b = (e.target as HTMLElement).closest('[data-share]') as HTMLElement | null;
+      if (!b) return;
+      const t = encodeURIComponent(shareText), u = encodeURIComponent(site);
+      if (b.dataset.share === 'copy'){
+        navigator.clipboard?.writeText(site).then(() => { b.textContent = 'Copied'; }).catch(() => {});
+        return;
+      }
+      const urls: Record<string, string> = {
+        x: 'https://twitter.com/intent/tweet?text=' + t + '&url=' + u,
+        linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + u,
+        whatsapp: 'https://wa.me/?text=' + t + '%20' + u,
+      };
+      window.open(urls[b.dataset.share!], '_blank', 'noopener,noreferrer');
+    });
+  </script>
+</Company>

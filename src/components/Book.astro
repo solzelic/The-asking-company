@@ -1,0 +1,50 @@
+---
+/* One book. A real box in 3D: spine facing out, cover on the right
+   face, page edges on top. CSS turns it on hover; library.js does
+   the rest. Planned volumes are spine-only outlines. */
+interface Props {
+  book: any;
+  i?: number;
+}
+const { book: b, i = 0 } = Astro.props;
+const d = Math.round(b.h * 0.68); // cover width = depth of the box
+const style = `--w:${b.w}px;--h:${b.h}px;--d:${d}px;--cloth:${b.spine || '#847d70'};` +
+  `--cink:${b.spineInk || '#f7f4ec'};--lean:${b.lean || 0}deg;--i:${i}`;
+---
+{b.planned ? (
+  <div class="bk planned" style={style} data-planned data-slug={b.slug} data-series={b.series} data-order={i}
+       data-title={b.title} data-dek={b.dek} title={`Not yet written — ${b.title}`}>
+    <span class="bk-3d"><span class="bk-spine">
+      <span class="bands"></span>
+      <span class="sp-t">{b.title}</span>
+      <span class="sp-n">—</span>
+    </span></span>
+  </div>
+) : (
+  <a class="bk" href={b.href} style={style}
+     data-slug={b.slug} data-series={b.series} data-series-name={b.seriesName}
+     data-tags={b.tags.join(' ')} data-company={b.company ? '1' : '0'}
+     data-words={b.words} data-minutes={b.minutes} data-date={b.iso}
+     data-date-label={b.dateLabel} data-title={b.title} data-dek={b.dek} data-no={b.no}
+     aria-label={`${b.title} — ${b.dek}`}>
+    <span class="bk-3d">
+      <span class="bk-spine">
+        <span class="bands"></span>
+        <span class="sp-t">{b.title}</span>
+        <span class="sp-n">{b.no}</span>
+      </span>
+      <span class="bk-cover">
+        {b.cover ? <img src={b.cover} alt="" loading="lazy" /> : (
+          <>
+            <span class="c-rosette"></span><span class="c-frame"></span>
+            <span class="c-top"><span class="c-ser">{b.seriesName}</span><span class="c-no">No. {b.no}</span></span>
+            <span class="c-mid"><span class="c-rule"></span>{b.title}</span>
+            <span class="c-bot"><span class="c-im">Asking Company</span><span class="c-no">{b.dateLabel}</span></span>
+          </>
+        )}
+      </span>
+      <span class="bk-top"></span>
+      <span class="bk-back"></span>
+    </span>
+  </a>
+)}

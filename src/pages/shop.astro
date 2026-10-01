@@ -1,0 +1,33 @@
+---
+import Company from '../layouts/Company.astro';
+---
+<Company title="Shop — Asking Company" description="Merchandise was considered, priced, and set aside. Coming soon (maybe never)." page="shop" closer={false}>
+
+  <div class="note shop-note" style="text-align:center">
+    <span class="corner tr">$1</span><span class="corner bl">$1</span>
+    <span class="eyebrow">Commercial Operations</span>
+    <h2 style="font-size:clamp(32px,6.4vw,54px)">Shop.</h2>
+
+    <div class="soon">
+      <p class="soon-big">Coming soon</p>
+      <p class="soon-maybe">(maybe never)</p>
+    </div>
+
+    <p class="dim narrow" style="margin:0 auto;max-width:520px">
+      Merchandise was considered, priced, and set aside. A second product would dilute the
+      first, and the first is already doing very little. Management remains bullish.
+    </p>
+
+    <div style="margin-top:34px">
+      <a class="btn" href="/" style="text-decoration:none;text-align:center">Back to the ask</a>
+    </div>
+  </div>
+
+</Company>
+
+<style is:global>
+  .shop-note .soon{margin:30px 0 30px;padding:26px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  .shop-note .soon-big{font-family:var(--display);font-weight:700;margin:0;
+    font-size:clamp(40px,9vw,80px);line-height:1;letter-spacing:-.03em;color:var(--spot)}
+  .shop-note .soon-maybe{margin:12px 0 0;font-style:italic;font-size:clamp(17px,2.6vw,22px);color:var(--ink-45)}
+</style>

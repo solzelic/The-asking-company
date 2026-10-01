@@ -1,0 +1,200 @@
+---
+import Company from '../layouts/Company.astro';
+import { SITE } from '../site.config.js';
+---
+<Company title="Contact — Asking Company" description="Enquiries, wiring instructions, and a privacy note. For anything real, email us." page="contact">
+
+  <div class="note" style="--corner:'?'">
+    <span class="corner tr">?</span><span class="corner bl">?</span>
+    <span class="eyebrow">Enquiries</span>
+    <h2 style="font-size:clamp(32px,6.4vw,54px)">Contact us.</h2>
+    <p class="dim">Please complete the form below. All fields are optional. A member of the
+      team will respond.</p>
+  </div>
+
+  <p class="dim" style="text-align:center;font-size:15px;margin:22px auto 0;max-width:640px">
+    For anything real &mdash; refunds, problems with a payment &mdash; email
+    <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+  </p>
+
+  <section class="blk">
+    <form id="intake" novalidate>
+
+      <div class="fset">
+        <div class="fhead">Part I &mdash; Nature of Enquiry</div>
+        <div class="fbody">
+          <div class="fld"><label>Reason for contacting us</label>
+            <select>
+              <option></option>
+              <optgroup label="Payments">
+                <option>Sending one dollar</option>
+                <option>Sending an amount exceeding one dollar</option>
+                <option>Sending an amount exceeding one hundred dollars</option>
+                <option>Sending an amount exceeding one thousand dollars</option>
+                <option>Sending an amount exceeding one million dollars</option>
+                <option>Sending an amount below one dollar</option>
+                <option>Billing and payments</option>
+              </optgroup>
+              <optgroup label="Correspondence">
+                <option>Sending a nice letter</option>
+                <option>Sending a letter that is not nice</option>
+                <option>Wishing the company a happy birthday</option>
+                <option>Wishing an employee a happy birthday</option>
+                <option>Wishing the founder a happy birthday</option>
+              </optgroup>
+              <optgroup label="Business">
+                <option>General enquiry</option>
+                <option>Partnership or business development</option>
+                <option>Press and media</option>
+                <option>Investor relations (we don't have any)</option>
+                <option>Careers</option>
+              </optgroup>
+              <optgroup label="Administrative">
+                <option>Legal or compliance</option>
+                <option>Technical support</option>
+                <option>Reporting a problem with the website</option>
+                <option>Other</option>
+              </optgroup>
+            </select></div>
+          <div class="fld"><label>Priority</label>
+            <select><option></option><option>Normal</option><option>High</option>
+              <option>Urgent</option></select>
+            <span class="hint">Urgent enquiries are reviewed within one business day.</span></div>
+        </div>
+      </div>
+
+      <div class="fset">
+        <div class="fhead">Part II &mdash; Identification</div>
+        <div class="fbody">
+          <div class="fld"><label>Full legal name</label><input type="text" autocomplete="name"></div>
+          <div class="fld"><label>Occupation</label><input type="text"></div>
+        </div>
+      </div>
+
+      <div class="fset">
+        <div class="fhead">Part III &mdash; Address</div>
+        <div class="fbody">
+          <div class="fld wide"><label>Street address</label><input type="text" autocomplete="street-address"></div>
+          <div class="fld"><label>City</label><input type="text"></div>
+          <div class="fld"><label>Postal code</label><input type="text" autocomplete="postal-code"></div>
+          <div class="fld"><label>Country</label><input type="text" autocomplete="country-name"></div>
+          <div class="fld"><label>Buzzer or entry code</label><input type="text">
+            <span class="hint">For deliveries.</span></div>
+        </div>
+      </div>
+
+      <div class="fset">
+        <div class="fhead">Part IV &mdash; Source of Funds</div>
+        <div class="fbody">
+          <div class="fld"><label>Employer</label><input type="text" autocomplete="organization"></div>
+          <div class="fld"><label>Annual income</label>
+            <select><option></option><option>Under $50,000</option><option>$50,000 &ndash; $100,000</option>
+              <option>$100,000 &ndash; $250,000</option><option>$250,000 &ndash; $1,000,000</option>
+              <option>$1,000,000 &ndash; $10,000,000</option><option>Over $10,000,000</option>
+              <option>Prefer not to say</option></select></div>
+          <div class="fld"><label>Source of funds</label>
+            <select><option></option><option>Employment income</option><option>Savings</option>
+              <option>Investment returns</option><option>Gift</option><option>Inheritance</option>
+              <option>Sale of property</option><option>Other</option></select></div>
+          <div class="fld"><label>Expected transaction value</label><input type="text" placeholder="$"></div>
+          <div class="fld wide"><span class="hint">Collected in line with standard practice for
+            transactions of any size.</span></div>
+        </div>
+      </div>
+
+      <div class="fset">
+        <div class="fhead">Part V &mdash; Message</div>
+        <div class="fbody">
+          <div class="fld wide"><label>Your message</label><textarea></textarea></div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px">
+        <button class="btn" type="submit">Submit enquiry</button>
+        <p class="tiny" style="text-align:center">Nothing on this page leaves your browser.</p>
+      </div>
+    </form>
+  </section>
+
+  <section class="blk">
+    <span class="eyebrow">Bank Transfer</span>
+    <h2>Wiring instructions.</h2>
+    <p class="dim narrow" style="margin:0 auto 24px">Provided because a company of this size is
+      expected to have them, and because somebody may one day ask.</p>
+
+    <div class="wire">
+      <div class="wire-head"><span>Beneficiary details</span><span>For international transfer</span></div>
+      <table class="tbl wire-tbl">
+        <tr><td>Beneficiary name</td><td class="r">Asking Company</td></tr>
+        <tr><td>Beneficiary address</td><td class="r">Toronto, Ontario, Canada</td></tr>
+        <tr><td>Financial institution</td><td class="r">To be confirmed</td></tr>
+        <tr><td>SWIFT / BIC</td><td class="r">To be confirmed</td></tr>
+        <tr><td>Institution &amp; transit no.</td><td class="r">To be confirmed</td></tr>
+        <tr><td>Account number</td><td class="r">To be confirmed</td></tr>
+        <tr><td>Intermediary bank</td><td class="r">Not applicable</td></tr>
+        <tr class="tot"><td>Reference</td><td class="r">Your name</td></tr>
+      </table>
+      <p class="wire-note">
+        <b>The account has not been opened.</b> There has not been a reason to. The remaining
+        details will be confirmed at the point at which somebody attempts to use them, which we
+        expect to be never.
+      </p>
+    </div>
+
+    <div class="grid g2" style="margin-top:20px">
+      <div class="tile"><div class="k">Typical wire fee</div><div class="v">$15&ndash;45</div>
+        <div class="n">Charged by your institution, not by us.</div></div>
+      <div class="tile"><div class="k">Amount being wired</div><div class="v">$1</div>
+        <div class="n">We raised the discrepancy with a bank. They were unable to assist.</div></div>
+    </div>
+
+    <div class="panel narrow" style="margin-top:24px;text-align:center">
+      <p><b>For amounts below one million dollars we recommend the button on the front page.</b></p>
+      <p class="dim" style="font-size:15px;margin-top:10px">It costs you nothing, arrives
+        immediately, and does not require you to telephone anybody.</p>
+      <div style="margin-top:22px"><button class="btn" data-ask="1">Give me one dollar</button></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <span class="eyebrow">Privacy</span>
+    <div class="panel narrow">
+      <p class="dim">There is no database. There is no customer relationship management system.
+        There is no relationship and there is no management. Anything entered above is discarded
+        when you close the tab, which is less a privacy commitment than a description of our
+        technical capabilities.</p>
+      <p><b>We ask for this because every company asks for it. We do not know why they do
+        either.</b></p>
+    </div>
+  </section>
+
+</Company>
+
+<script>
+  /* The intake form deliberately does NOT post anywhere. Collecting real
+     home addresses would create real obligations, which is a bad trade for
+     a joke. It is client-side only, and the page says so. */
+  const form = document.getElementById('intake') as HTMLFormElement | null;
+  form?.addEventListener('submit', e => {
+    e.preventDefault();
+    const els = [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('input, select, textarea')];
+    const filled = els.filter(el => el.value.trim() !== '').length;
+    const total = els.length;
+    const panel = document.createElement('div');
+    panel.className = 'panel spot';
+    panel.style.cssText = 'text-align:center;padding:44px 26px';
+    panel.innerHTML =
+      '<span class="eyebrow">Received</span>' +
+      '<h2 style="margin-bottom:14px">Thank you.</h2>' +
+      '<p class="dim" style="max-width:470px;margin:0 auto 14px">You completed ' + filled +
+      ' of ' + total + ' fields. A member of the team has read them once. There is one member ' +
+      'of the team and no system to enter them into, so they will now be remembered ' +
+      'inaccurately and then not at all.</p>' +
+      '<p class="dim" style="max-width:470px;margin:0 auto">Nothing was transmitted. Nothing ' +
+      'was stored. This is the most secure form on the internet, by accident.</p>' +
+      '<div style="margin-top:26px"><a class="btn" href="/" style="text-decoration:none">Back to the ask</a></div>';
+    form.replaceWith(panel);
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  });
+</script>
