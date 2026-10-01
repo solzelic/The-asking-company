@@ -91,17 +91,17 @@ let n = 0;
             <section class="sgroup" data-group={s.id}>
               <div class="shead">
                 <div><div class="no">{s.no}</div><h2>{s.name}</h2><p class="snote">{s.note}</p></div>
-                <div class="ct" data-ct></div>
+                <div class="sside">
+                  <div class="ct" data-ct></div>
+                  <button type="button" class="fbtn" data-follow={s.id} data-name={s.name}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4z"/></svg>
+                    Follow this shelf
+                  </button>
+                </div>
               </div>
               <div class="case" data-case={s.id}>
                 {all.filter(b => b.series === s.id).map(b => <Book book={b} i={n++} />)}
               </div>
-              <form class="follow" data-subscribe={`series:${s.id}`} data-done="Following. You will hear when this shelf grows.">
-                <span class="flab"><b>Follow this shelf.</b> One email when a volume is added here.</span>
-                <input type="email" required placeholder="you@example.com" autocomplete="email" aria-label={`Email address, to follow ${s.name}`}>
-                <input type="hidden" name="series" value={s.id}>
-                <button type="submit">Follow</button>
-              </form>
             </section>
           ))}
           <section class="sgroup flat" data-group="__flat" hidden>
@@ -129,6 +129,20 @@ let n = 0;
       </div>
 
       <div class="card-slot"><div class="ccard" id="ccard" aria-hidden="true"></div></div>
+
+      <div class="fscrim" id="fscrim"></div>
+      <div class="fsheet" id="fsheet" role="dialog" aria-modal="true" aria-labelledby="fsTitle" aria-hidden="true">
+        <button type="button" class="fx" id="fsClose" aria-label="Close">×</button>
+        <div class="fkick">Follow this shelf</div>
+        <h3 id="fsTitle">The Succession Papers</h3>
+        <p class="fnote">One email when a volume is added here, and nothing else. There is no schedule and we will not invent one.</p>
+        <form id="fsForm" class="fsform">
+          <input type="email" id="fsEmail" required placeholder="you@example.com" autocomplete="email" aria-label="Email address">
+          <button type="submit" id="fsGo">Follow</button>
+        </form>
+        <p class="ferr" id="fsErr" role="alert" hidden></p>
+        <div class="fdone" id="fsDone" hidden><span class="tick">✓</span><div><b>Following.</b> You will hear when this shelf grows.</div></div>
+      </div>
 
       <section class="rsub">
         <h2>Be told when anything is released.</h2>

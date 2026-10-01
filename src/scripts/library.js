@@ -406,6 +406,43 @@ addEventListener('pageshow', e => {
   if (e.persisted) stacks.classList.remove('ready');
 });
 
+/* ── follow a shelf ── */
+const fsheet = $('fsheet'), fscrim = $('fscrim'), fsForm = $('fsForm');
+let followId = '';
+function openFollow(id, name){
+  followId = id;
+  $('fsTitle').textContent = name;
+  fsForm.hidden = false; $('fsDone').hidden = true; $('fsErr').hidden = true;
+  $('fsGo').disabled = false; $('fsEmail').value = '';
+  fsheet.classList.add('on'); fscrim.classList.add('on'); fsheet.setAttribute('aria-hidden', 'false');
+  setTimeout(() => $('fsEmail').focus(), 60);
+}
+function closeFollow(){ fsheet.classList.remove('on'); fscrim.classList.remove('on'); fsheet.setAttribute('aria-hidden', 'true'); }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-follow]');
+  if (b) openFollow(b.dataset.follow, b.dataset.name);
+});
+fscrim.addEventListener('click', closeFollow);
+$('fsClose').addEventListener('click', closeFollow);
+addEventListener('keydown', e => { if (e.key === 'Escape') closeFollow(); });
+fsForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = $('fsEmail').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+  $('fsGo').disabled = true; $('fsErr').hidden = true;
+  let ok = false;
+  try {
+    const r = await fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, writings: true, billion: false, series: followId, source: 'series' }) });
+    ok = r.ok;
+  } catch {}
+  if (!ok){ $('fsErr').hidden = false; $('fsErr').textContent = 'That did not go through — the list is not switched on yet. Try again soon.'; $('fsGo').disabled = false; return; }
+  fsForm.hidden = true; $('fsDone').hidden = false;
+  const btn = document.querySelector(`[data-follow="${followId}"]`);
+  if (btn){ btn.classList.add('done'); btn.lastChild.textContent = ' Following'; }
+  setTimeout(closeFollow, 1800);
+});
+
 /* ── the lamp follows you ── */
 if (!reduced && !coarse){
   let raf = 0, x = 0, y = 0;
