@@ -327,7 +327,7 @@ function open(b, e){
   const r = b.getBoundingClientRect();
   const w = cssPx(b, '--w'), h = cssPx(b, '--h');
   const wrap = document.createElement('div');
-  wrap.className = 'flywrap';
+  wrap.className = 'flywrap out';
   Object.assign(wrap.style, { left: r.left + 'px', top: r.top + 'px', width: w + 'px', height: h + 'px' });
   const fly = b.cloneNode(true);
   fly.classList.remove('sel', 'nudge-l', 'nudge-r', 'enter');
@@ -392,7 +392,7 @@ card.addEventListener('click', e => {
 // Coming back with the back button: put everything back.
 addEventListener('pageshow', e => {
   opening = false;
-  $$('.flywrap, .pageveil').forEach(x => x.remove());
+  $$('.flywrap.out, .pageveil').forEach(x => x.remove());
   books.forEach(b => { b.classList.remove('sel', 'nudge-l', 'nudge-r'); b.style.visibility = ''; });
   if (e.persisted) stacks.classList.remove('ready');
 });
@@ -433,6 +433,53 @@ fsForm.addEventListener('submit', async e => {
   if (btn){ btn.classList.add('done'); btn.lastChild.textContent = ' Following'; }
   setTimeout(closeFollow, 1800);
 });
+
+/* ── the landing: a book coming home from an essay ──
+   The essay page leaves a note saying which book it was. We start the
+   closed book at the centre, where the essay page left it, and fly it
+   down into its slot on the shelf. */
+function landBook(){
+  let note = null;
+  try { note = JSON.parse(sessionStorage.getItem('ac-return') || 'null'); sessionStorage.removeItem('ac-return'); } catch {}
+  if (!note || Date.now() - (note.t || 0) > 5000) return;
+  const b = real.find(x => x.dataset.slug === note.slug);
+  if (!b || reduced) return;
+  b.style.animation = 'none';
+  b.style.visibility = 'hidden';
+  b.closest('.case')?.scrollIntoView({ block: 'center', behavior: 'instant' });
+  const r = b.getBoundingClientRect();
+  const w = cssPx(b, '--w'), h = cssPx(b, '--h');
+  const S = Math.min(innerHeight * .46, 380) / h;
+  const wrap = document.createElement('div');
+  wrap.className = 'flywrap';
+  Object.assign(wrap.style, { left: (innerWidth / 2 - w / 2) + 'px', top: (innerHeight / 2 - h / 2) + 'px', width: w + 'px', height: h + 'px' });
+  const fly = b.cloneNode(true);
+  fly.classList.remove('sel', 'nudge-l', 'nudge-r', 'enter');
+  fly.classList.add('fly');
+  fly.removeAttribute('href');
+  fly.style.visibility = ''; fly.style.animation = '';
+  Object.assign(fly.style, { width: w + 'px', height: h + 'px' });
+  wrap.appendChild(fly);
+  document.body.appendChild(wrap);
+  const inner = fly.querySelector('.bk-3d');
+  const dx = (r.left + w / 2) - innerWidth / 2, dy = (r.top + h / 2) - innerHeight / 2;
+  const ease = 'cubic-bezier(.25,.8,.25,1)';
+  const flight = fly.animate([
+    { transform: `translate(0,0) scale(${S})` },
+    { transform: `translate(${dx * .6}px,${dy * .55 - 40}px) scale(${1 + (S - 1) * .45})`, offset: .5 },
+    { transform: `translate(${dx}px,${dy}px) scale(1)` },
+  ], { duration: 640, delay: 80, easing: ease, fill: 'forwards' });
+  inner.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], { duration: 640, delay: 80, easing: ease, fill: 'forwards' });
+  flight.finished.then(() => {
+    b.style.visibility = '';
+    wrap.remove();
+    // a small settle as it takes its place
+    b.animate([{ transform: 'translateY(-6px) rotate(var(--lean))' }, { transform: 'translateY(0) rotate(var(--lean))' }],
+      { duration: 420, easing: 'cubic-bezier(.2,1.4,.4,1)' });
+  }).catch(() => { b.style.visibility = ''; wrap.remove(); });
+}
+landBook();
+addEventListener('pageshow', e => { if (e.persisted) landBook(); });
 
 /* ── the lamp follows you ── */
 if (!reduced && !coarse){

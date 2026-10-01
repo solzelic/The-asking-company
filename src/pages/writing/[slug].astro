@@ -1,6 +1,7 @@
 ---
 import { render } from 'astro:content';
 import Library from '../../layouts/Library.astro';
+import Book from '../../components/Book.astro';
 import { getBooks } from '../../lib/library.js';
 import { SITE } from '../../site.config.js';
 
@@ -39,6 +40,7 @@ const accent = lum(b.spine) < 0.55 ? b.spine : '#0f766e';
       try {
         var nav = performance.getEntriesByType('navigation')[0];
         if (!(nav && nav.type === 'back_forward') && !location.hash) {
+          document.documentElement.classList.add('settle');
           scrollTo(0, 0);
           addEventListener('load', function(){ scrollTo(0, 0); }, { once: true });
         }
@@ -97,6 +99,7 @@ const accent = lum(b.spine) < 0.55 ? b.spine : '#0f766e';
     </section>
   </article>
 
+  <div class="putback" id="putback" aria-hidden="true"><Book book={b} still /></div>
   <aside class="rail" id="rail" aria-label="Progress"><div class="trk"></div><div class="fil"></div><div class="pct" id="pct">0%</div></aside>
 
   <div class="tools" id="tools" role="toolbar" aria-label="Reading tools">

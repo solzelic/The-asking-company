@@ -213,10 +213,84 @@ else {
   addEventListener('pagehide', () => synth.cancel());
 }
 
+/* ── the way back: put the book down ──
+   The text fades, the paper shrinks back into the open book, the cover
+   closes, and the closed book is handed to the shelf page, which lands
+   it in its slot. Any link to the Library, or Escape, does this. */
+const cssPx = (el, v) => parseFloat(getComputedStyle(el).getPropertyValue(v)) || 0;
+let leaving = false;
+function handOff(){ try { sessionStorage.setItem('ac-return', JSON.stringify({ slug, t: Date.now() })); } catch {} }
+addEventListener('pagehide', handOff);
+addEventListener('pageshow', e => {
+  if (!e.persisted) return;
+  leaving = false;
+  html.classList.remove('leaving');
+  document.querySelectorAll('.flywrap, .roomveil').forEach(x => x.remove());
+});
+function putBack(href){
+  if (leaving) return;
+  leaving = true;
+  handOff();
+  const src = document.querySelector('#putback .bk');
+  if (reduced || !src){ location.href = href; return; }
+  const w = cssPx(src, '--w'), h = cssPx(src, '--h'), d = cssPx(src, '--d');
+  const S = Math.min(innerHeight * .46, 380) / h;
+  const wrap = document.createElement('div');
+  wrap.className = 'flywrap';
+  Object.assign(wrap.style, { left: (innerWidth / 2 - w / 2) + 'px', top: (innerHeight / 2 - h / 2) + 'px', width: w + 'px', height: h + 'px' });
+  const fly = src.cloneNode(true);
+  fly.classList.add('fly');
+  Object.assign(fly.style, { width: w + 'px', height: h + 'px', transform: `scale(${S})` });
+  wrap.appendChild(fly);
+  const inner = fly.querySelector('.bk-3d'), cover = fly.querySelector('.bk-cover'), inside = fly.querySelector('.bk-inside');
+  inner.style.transform = 'rotateY(-90deg)';
+  const base = `rotateY(90deg) translateZ(${w / 2}px)`;
+  const hinge = a => `${base} translateX(${-d / 2}px) rotateY(${a}deg) translateX(${d / 2}px)`;
+  cover.style.transform = hinge(-180);
+  inside.style.transform = hinge(-180) + ' rotateY(180deg)';
+  const dark = document.createElement('div');
+  dark.className = 'roomveil';
+  document.body.append(dark, wrap);
+
+  // the open page covers the screen, exactly as it did on the way in
+  const pg = fly.querySelector('.bk-page').getBoundingClientRect();
+  const r = wrap.getBoundingClientRect();
+  const px = pg.left + pg.width / 2 - r.left, py = pg.top + pg.height / 2 - r.top;
+  const F = Math.max(innerWidth / pg.width, innerHeight / pg.height) * 1.15;
+  wrap.style.transformOrigin = `${px}px ${py}px`;
+  const big = `translate(${innerWidth / 2 - (r.left + px)}px,${innerHeight / 2 - (r.top + py)}px) scale(${F})`;
+  wrap.style.transform = big;
+
+  // 1. the words fade; the room darkens behind the page
+  html.classList.add('leaving');
+  dark.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 520, delay: 120, easing: 'ease-in-out', fill: 'forwards' });
+  // 2. the page shrinks back into the open book
+  wrap.animate([{ transform: big }, { transform: 'translate(0,0) scale(1)' }],
+    { duration: 520, delay: 180, easing: 'cubic-bezier(.3,0,.2,1)', fill: 'forwards' });
+  // 3. the cover closes
+  const swing = { duration: 460, delay: 640, easing: 'cubic-bezier(.4,.6,.2,1)', fill: 'forwards' };
+  cover.animate([{ transform: hinge(-180) }, { transform: hinge(0) }], swing);
+  inside.animate([{ transform: hinge(-180) + ' rotateY(180deg)' }, { transform: hinge(0) + ' rotateY(180deg)' }], swing);
+  // 4. hand it to the shelf
+  setTimeout(() => { location.href = href; }, 1120);
+  setTimeout(() => { if (!document.hidden && leaving){ wrap.remove(); dark.remove(); html.classList.remove('leaving'); leaving = false; } }, 6000);
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  let u; try { u = new URL(a.href, location.href); } catch { return; }
+  if (u.origin !== location.origin || u.pathname.replace(/\.html$/, '').replace(/\/$/, '') !== '/writing') return;
+  e.preventDefault();
+  putBack(a.href);
+});
+
 /* ── keys ── */
 addEventListener('keydown', e => {
   if (e.target.matches('input, textarea, select') || e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.key === 'Escape'){ openSheet(false); qpop.classList.remove('on'); }
+  if (e.key === 'Escape'){
+    if (sheet.classList.contains('on') || qpop.classList.contains('on')){ openSheet(false); qpop.classList.remove('on'); }
+    else putBack('/writing');
+  }
   if (e.key === 'ArrowRight'){ const n = document.querySelector('.enav .nx[href]'); if (n) location.href = n.href; }
   if (e.key === 'ArrowLeft'){ const p = document.querySelector('.enav a:not(.nx)'); if (p) location.href = p.href; }
 });

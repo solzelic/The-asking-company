@@ -352,10 +352,7 @@ html[data-theme=sepia] .light .lbar{background:rgba(242,233,214,.88)}
 .ehead .meta{font-family:var(--mono);font-size:11.5px;color:var(--ink-45);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
 .ehead .meta .letterhead{color:var(--accent)}
 .ehead .meta .remain{margin-left:auto}
-.ehead > *{animation:fadeUp .8s var(--ease) backwards}
-.ehead .crumbs{animation-delay:0s}.ehead h1{animation-delay:.06s}.ehead .dek{animation-delay:.12s}.ehead .meta{animation-delay:.18s}
-.ehead .rule{height:1px;background:var(--rule);margin-top:34px;animation-delay:.24s;transform-origin:0 50%;animation-name:ruleIn}
-@keyframes ruleIn{from{transform:scaleX(0)}}
+.ehead .rule{height:1px;background:var(--rule);margin-top:34px;transform-origin:0 50%}
 
 /* ── the text ── */
 .prose{max-width:calc(680px * var(--mw,1));margin:0 auto;padding:40px 24px 0;
@@ -389,7 +386,6 @@ html[data-font=legible] .prose > p:first-of-type::first-letter{float:none;font-s
 .prose .footnotes{margin-top:3em;padding-top:1.4em;border-top:1px solid var(--rule);font-size:.78em;color:var(--ink-70)}
 .prose .footnotes h2{display:none}
 .prose ::selection{background:color-mix(in srgb,var(--accent) 28%,transparent)}
-.prose > *{animation:fadeUp .8s .25s var(--ease) backwards}
 /* focus mode: the paragraph you are on stays; the rest recedes */
 html[data-focus] .prose > *{transition:opacity .45s}
 html[data-focus] .prose > *:not(.near){opacity:.22}
@@ -399,6 +395,37 @@ html[data-focus] .lbar:hover,html[data-focus] .rail:hover{opacity:1;pointer-even
 .prose .speaking{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 14%,transparent),transparent 92%);
   border-radius:4px;box-shadow:-10px 0 0 color-mix(in srgb,var(--accent) 14%,transparent),10px 0 0 color-mix(in srgb,var(--accent) 14%,transparent)}
 @media (max-width:560px){ .prose{font-size:calc(19px * var(--fs,1))} .prose blockquote{margin:1.6em 0;padding-left:1em} .ehead{padding-top:36px} }
+
+/* ── the settle: on a fresh opening, the page arrives like ink drying ──
+   Each piece rises a little and sharpens from a blur, one after another.
+   html.settle is set by the page head on fresh navigations only. */
+@keyframes ink{from{opacity:0;transform:translateY(16px);filter:blur(6px)}60%{filter:blur(0)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes inkRule{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
+@keyframes toolsIn{from{opacity:0;transform:translate(-50%,120%)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes fadeOnly{from{opacity:0}to{opacity:1}}
+html.settle .lbar{animation:fadeOnly .6s .9s var(--ease) both}
+html.settle .ehead .crumbs{animation:ink .8s .05s var(--ease) both}
+html.settle .ehead h1{animation:ink 1s .18s var(--ease) both}
+html.settle .ehead .dek{animation:ink .9s .38s var(--ease) both}
+html.settle .ehead .meta{animation:ink .8s .52s var(--ease) both}
+html.settle .ehead .rule{animation:inkRule 1.1s .6s cubic-bezier(.2,.8,.2,1) both}
+html.settle .prose > *{animation:ink .9s 1.1s var(--ease) both}
+html.settle .prose > :nth-child(1){animation-delay:.68s}
+html.settle .prose > :nth-child(2){animation-delay:.78s}
+html.settle .prose > :nth-child(3){animation-delay:.86s}
+html.settle .prose > :nth-child(4){animation-delay:.93s}
+html.settle .prose > :nth-child(5){animation-delay:.99s}
+html.settle .prose > :nth-child(6){animation-delay:1.04s}
+html.settle .tools{animation:toolsIn .7s 1.25s var(--spring) both}
+html.settle .tools.away{animation:none}
+/* the first letter arrives a beat after its paragraph */
+html.settle .prose > p:first-of-type::first-letter{animation:ink 1s .95s var(--ease) both}
+@media (prefers-reduced-motion:reduce){ html.settle .lbar,html.settle .ehead > *,html.settle .prose > *,html.settle .tools{animation:none} }
+
+/* ── the way back: putting the book down ── */
+.putback{display:none}
+.roomveil{position:fixed;inset:0;z-index:100;background:#14110c;opacity:0;pointer-events:none}
+html.leaving .essay-page,html.leaving .tools,html.leaving .rail,html.leaving .lbar,html.leaving .lfoot{transition:opacity .22s ease-out;opacity:0}
 
 /* ── the rail: progress with a tick for every section ── */
 .rail{position:fixed;right:22px;top:50%;transform:translateY(-50%);height:min(58vh,520px);width:28px;z-index:40;
@@ -517,9 +544,6 @@ html[data-theme=night] .tools{box-shadow:0 10px 40px rgba(0,0,0,.5),inset 0 1px 
 .esub h2{font-weight:500;font-size:28px;margin:0 0 8px;color:var(--ink)}
 .esub p{color:var(--ink-70);font-style:italic;margin:0 0 20px}
 
-/* ── page to page: a short crossfade, so the opened page becomes the essay ── */
-@view-transition{navigation:auto}
-::view-transition-old(root),::view-transition-new(root){animation-duration:.28s}
 
 /* footer of the library */
 .lfoot{font-family:var(--sans);font-size:11px;padding:28px 24px 40px;text-align:center;opacity:.55;line-height:1.8}
