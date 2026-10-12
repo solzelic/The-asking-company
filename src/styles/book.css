@@ -35,7 +35,9 @@
   margin-top:calc(var(--row,300px) - var(--plank,18px) - 6px - var(--h));margin-bottom:var(--plank,18px);
   perspective:1100px;perspective-origin:50% 35%;text-decoration:none;color:var(--cink);
   transform-origin:bottom center;transform:rotate(var(--lean));z-index:1;
-  transition:transform .55s var(--spring),z-index 0s .55s;
+  /* z-index eases down over the return, so a book going home always sits
+     below the one being pulled out, and above the rest — no overlap. */
+  transition:transform .55s var(--spring),z-index .55s linear;
   -webkit-tap-highlight-color:transparent}
 .bk:focus-visible{outline:none}
 .bk-3d{position:absolute;inset:0;transform-style:preserve-3d;
@@ -86,7 +88,7 @@
 @keyframes shelve{from{opacity:0;transform:translateY(-60px) rotate(calc(var(--lean) - 6deg))}}
 
 /* hover / selected: pulled out and turned to show the cover */
-.bk:not(.planned):hover,.bk.sel,.bk:focus-visible{z-index:10;transition:transform .55s var(--spring),z-index 0s}
+.bk:not(.planned):hover,.bk.sel,.bk:focus-visible{z-index:40;transition:transform .55s var(--spring),z-index 0s}
 .bk:not(.planned):hover .bk-3d,.bk.sel .bk-3d,.bk:focus-visible .bk-3d{
   transform:translateX(calc(var(--d) * .32)) translateY(-16px) translateZ(70px) rotateY(-62deg)}
 .bk.nudge-l{transform:translateX(-7px) rotate(calc(var(--lean) - 2.5deg))}
