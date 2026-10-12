@@ -35,7 +35,7 @@ export default {
       if (request.method !== method) return new Response('Method not allowed', { status: 405 });
       const params = param ? { [param]: m[1] } : {};
       try { return await handler({ request, env, params, waitUntil: ctx.waitUntil.bind(ctx) }); }
-      catch (e) { console.error(e); return new Response(JSON.stringify({ error: 'Something went wrong on our side.' }), { status: 500, headers: { 'Content-Type': 'application/json' } }); }
+      catch (e) { console.error(url.pathname, e && e.message, e && e.stack); return new Response(JSON.stringify({ error: 'Something went wrong on our side.' }), { status: 500, headers: { 'Content-Type': 'application/json' } }); }
     }
     return env.ASSETS.fetch(request);
   },

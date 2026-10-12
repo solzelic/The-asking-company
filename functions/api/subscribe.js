@@ -1,10 +1,11 @@
 /* POST /api/subscribe { email, writings, billion, series, source }
    Stores the address. `series` is a shelf id; a person can follow several. Sending is done by hand (or by whatever mail
    service you later point at this table) — see README. */
-import { noDB, json } from '../_lib/gifts.js';
+import { noDB, ready, json } from '../_lib/gifts.js';
 
 export async function onRequestPost({ request, env }){
   const off = noDB(env); if (off) return off;
+  await ready(env);
   let b;
   try { b = await request.json(); } catch { return json({ error: 'Bad request.' }, 400); }
   const email = String(b.email || '').trim().toLowerCase().slice(0, 254);
