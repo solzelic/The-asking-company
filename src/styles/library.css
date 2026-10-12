@@ -167,16 +167,22 @@ body.light{background:var(--paper);color:var(--ink)}
 .count button{background:none;border:0;color:var(--brass);cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:600;padding:0;margin-left:8px}
 .count button:hover{text-decoration:underline;text-underline-offset:3px}
 @media (max-width:640px){
-  .frow{align-items:flex-start}
-  .flab{padding-top:9px}
-  .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .chips::-webkit-scrollbar{display:none}
-  .chip{flex:none}
+  /* nothing scrolls sideways on a phone: labels on their own line, chips wrap */
+  .frows{gap:12px;padding-top:12px}
+  .frow{flex-direction:column;align-items:stretch;gap:8px}
+  .frow.end{flex-direction:row;align-items:center;justify-content:space-between}
+  .flab{width:auto;padding:0 2px}
+  .chips{flex-wrap:wrap;gap:6px}
+  .chip{padding:7px 12px}
 }
 @media (max-width:760px){
   .bar{gap:6px}
   .search{flex-basis:100%}
-  .menu-wrap{position:static}
+  /* the voice segment takes the full width; sort and view share the next line */
+  .bar > .seg:not(.view){flex:1 1 100%;display:flex}
+  .bar > .seg:not(.view) button{flex:1;justify-content:center;padding:8px 6px;font-size:12px}
+  .menu-wrap{position:static;flex:1 1 auto}
+  .mbtn.sel{width:100%}
   .pop{position:fixed;left:12px;right:12px;top:auto;bottom:12px;min-width:0;transform-origin:bottom center;
     padding-bottom:max(10px,env(safe-area-inset-bottom))}
 }
