@@ -1,7 +1,14 @@
-# Cloudflare Pages project. See README.md → "Deploying" for the full walkthrough.
+# Cloudflare Worker with static assets. See README.md → "Going live".
 name = "the-asking-company"
-pages_build_output_dir = "./dist"
+main = "src/worker.js"
 compatibility_date = "2026-09-01"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"
+run_worker_first = ["/api/*", "/og/*"]
 
 [vars]
 CURRENCY = "usd"
@@ -17,6 +24,6 @@ BLOCKED_WORDS = ""
 # database_id = "PASTE_THE_DATABASE_ID_HERE"
 # migrations_dir = "migrations"
 
-# Secrets (never commit these; set them with wrangler or the dashboard):
+# Secrets (never commit these; set them in the dashboard → Settings → Variables and Secrets):
 #   STRIPE_SECRET_KEY      sk_live_… or sk_test_…
 #   STRIPE_WEBHOOK_SECRET  whsec_…

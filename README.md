@@ -5,7 +5,7 @@ Two halves, one site:
 - **The company** (`/`, `/prospectus`, `/filings`, `/careers`, `/legal`, `/contact`, `/shop`): the joke. Paper, banknote frames, one spot ink per page.
 - **The Library** (`/writing`): the quiet half. A lit bookcase with filters and full-text search, and essays set for reading.
 
-Built with [Astro](https://astro.build) as a static site. The few dynamic parts (payments, the live counter and ledger, the mailing list) are small Cloudflare Pages Functions in `functions/`, backed by a Cloudflare D1 database.
+Built with [Astro](https://astro.build) as a static site and deployed as a Cloudflare Worker with static assets. The few dynamic parts (payments, the live counter and ledger, the mailing list, link previews) are small handlers in `functions/`, routed by `src/worker.js`, backed by a Cloudflare D1 database.
 
 ## Adding a piece of writing
 
@@ -62,7 +62,7 @@ To run the backend too:
 
 ```sh
 npx wrangler d1 migrations apply asking-company --local
-npm run build && npx wrangler pages dev dist
+npm run build && npm run preview      # the Worker, at http://localhost:8787
 ```
 
 Put local secrets in `.dev.vars` (git-ignored):
@@ -79,23 +79,16 @@ You need three things: a Cloudflare account (free), your Stripe account, and the
 ### 1. Cloudflare
 
 1. Create a free account at cloudflare.com.
-2. Run `npx wrangler login`, then create the database:
-   `npx wrangler d1 create asking-company`
-   Copy the `database_id` it prints into `wrangler.toml`.
-3. Create the tables and the first fifteen givers:
-   `npx wrangler d1 migrations apply asking-company --remote`
-4. In the Cloudflare dashboard, go to **Workers & Pages → Create → Pages → Connect to Git** and pick this repository.
-   - Build command: `npm run build`
-   - Output directory: `dist`
-   - Every push to `main` then deploys automatically.
-5. Under **Settings → Bindings**, add a D1 binding named `DB` pointing at `asking-company`. (wrangler.toml should do this, but check.)
+2. **Workers & Pages → Create application → Import a repository** → pick this repo. Production branch `main`, build command `npm run build`, deploy command `npx wrangler deploy` (the defaults). Every push to `main` then builds and deploys.
+3. **The database.** Storage & Databases → D1 → Create → name `asking-company`. Open it → Console → paste `migrations/ALL.sql` → Execute. Copy its Database ID into `wrangler.toml` (uncomment the `[[d1_databases]]` block) and push.
+4. **Custom domain.** Open the Worker → Settings → Domains & Routes → Add → Custom domain → `theaskingcompany.com` (and `www`).
 
 ### 2. The domain (GoDaddy → Cloudflare)
 
 1. In Cloudflare, use **Add a domain**, enter `theaskingcompany.com` and choose the Free plan. Cloudflare shows you two nameservers.
 2. In GoDaddy, go to **My Products → the domain → DNS → Nameservers → Change → "I'll use my own nameservers"** and paste Cloudflare's two.
    This takes anywhere from minutes to a few hours.
-3. In the Pages project, go to **Custom domains** and add `theaskingcompany.com` and `www.theaskingcompany.com`.
+3. Then add the custom domain to the Worker (step 1.4 above).
 
 The domain stays registered (and billed) at GoDaddy. Only the DNS moves.
 
@@ -109,7 +102,7 @@ The domain stays registered (and billed) at GoDaddy. Only the DNS moves.
    - URL: `https://theaskingcompany.com/api/webhook`
    - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`, `charge.dispute.created`
    - Copy the signing secret (`whsec_…`).
-4. **Secrets.** In the Pages project, go to **Settings → Variables and Secrets** and add `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` as *encrypted* secrets.
+4. **Secrets.** Open the Worker → **Settings → Variables and Secrets** and add `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` as *secrets*.
 5. **Card testing.** A $1 checkout is exactly what people with stolen cards use to test them, and each dispute costs ~$15. Stripe Checkout runs Radar automatically. In **Radar → Rules**, also turn on *"Block if :risk_level: = 'elevated'"*. If you see a burst of failed $1 payments, add a Cloudflare rate-limiting rule on `/api/checkout`.
 
 Test first with `sk_test_…` keys and card `4242 4242 4242 4242`. Then switch to live keys.
@@ -154,5 +147,5 @@ npx wrangler d1 execute asking-company --remote --command "SELECT email, writing
 | Library styles / book 3D | `src/styles/library.css`, `src/styles/book.css` |
 | Shelf motion and filters | `src/scripts/library.js` |
 | Payment flow (client) | `src/scripts/ask.js`, `src/pages/thanks.astro` |
-| Payment backend | `functions/api/*.js` |
+| Payment backend | `functions/api/*.js`, routed by `src/worker.js` |
 | Database schema | `migrations/` |
