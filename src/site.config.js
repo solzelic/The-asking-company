@@ -5,7 +5,7 @@ export const SITE = {
   url: 'https://theaskingcompany.com',
   name: 'Asking Company',
   domainLabel: 'theaskingcompany.com',
-  email: 'hello@theaskingcompany.com',
+  email: 'solzelic@gmail.com',   // shown on Contact and Terms; swap for hello@ once that inbox exists
   city: 'Toronto, Ontario, Canada',
   description:
     'I am not sick. I am not poor. Nothing is wrong. I want one dollar. From you. From everyone. That is the entire company.',
