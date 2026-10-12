@@ -2,9 +2,10 @@
    Confirms the payment with Stripe directly (so the certificate never
    waits on the webhook) and returns what the certificate needs. */
 import { stripe } from '../_lib/stripe.js';
-import { json, recordSession } from '../_lib/gifts.js';
+import { noDB, json, recordSession } from '../_lib/gifts.js';
 
 export async function onRequestGet({ request, env }){
+  const off = noDB(env); if (off) return off;
   const id = new URL(request.url).searchParams.get('id') || '';
   if (!/^cs_(test|live)_[A-Za-z0-9]{10,200}$/.test(id)) return json({ error: 'Unknown session.' }, 400);
 

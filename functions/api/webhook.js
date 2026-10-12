@@ -3,9 +3,10 @@
    checkout.session.async_payment_succeeded, charge.refunded,
    charge.dispute.created. */
 import { verifyWebhook } from '../_lib/stripe.js';
-import { json, recordSession } from '../_lib/gifts.js';
+import { noDB, json, recordSession } from '../_lib/gifts.js';
 
 export async function onRequestPost({ request, env }){
+  const off = noDB(env); if (off) return off;
   const raw = await request.text();
   const event = await verifyWebhook(env, raw, request.headers.get('Stripe-Signature'));
   if (!event) return json({ error: 'Invalid signature' }, 400);

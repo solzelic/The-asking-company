@@ -6,6 +6,9 @@ export const json = (data, status = 200, headers = {}) =>
     headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers },
   });
 
+/* Until the D1 database is bound, every endpoint that needs it says so. */
+export const noDB = env => !env.DB && json({ error: 'The ledger is not switched on yet.' }, 503);
+
 export const MAX_ASK = 524288;
 export const validAmount = a => Number.isInteger(a) && a >= 1 && a <= MAX_ASK && (a & (a - 1)) === 0;
 

@@ -8,11 +8,14 @@ CURRENCY = "usd"
 # Comma-separated words that turn a ledger name into "Anonymous".
 BLOCKED_WORDS = ""
 
-[[d1_databases]]
-binding = "DB"
-database_name = "asking-company"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
-migrations_dir = "migrations"
+# The database. Create it in the dashboard (Storage & Databases → D1 → Create,
+# name: asking-company), paste its Database ID below, and remove the leading
+# '#' from these five lines. Until then the site runs without a ledger.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "asking-company"
+# database_id = "PASTE_THE_DATABASE_ID_HERE"
+# migrations_dir = "migrations"
 
 # Secrets (never commit these; set them with wrangler or the dashboard):
 #   STRIPE_SECRET_KEY      sk_live_… or sk_test_…
