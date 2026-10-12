@@ -81,11 +81,11 @@ You need three things: a Cloudflare account (free), your Stripe account, and the
 1. Create a free account at cloudflare.com.
 2. **Workers & Pages → Create application → Import a repository** → pick this repo. Production branch `main`, build command `npm run build`, deploy command `npx wrangler deploy` (the defaults). Every push to `main` then builds and deploys.
 3. **The database.** Storage & Databases → D1 → Create → name `asking-company`. Open it → Console → paste `migrations/ALL.sql` → Execute. Copy its Database ID into `wrangler.toml` (uncomment the `[[d1_databases]]` block) and push.
-4. **Custom domain.** Open the Worker → Settings → Domains & Routes → Add → Custom domain → `theaskingcompany.com` (and `www`).
+4. **Custom domain.** Open the Worker → Settings → Domains & Routes → Add → Custom domain → `askingcompany.com` (and `www`).
 
 ### 2. The domain (GoDaddy → Cloudflare)
 
-1. In Cloudflare, use **Add a domain**, enter `theaskingcompany.com` and choose the Free plan. Cloudflare shows you two nameservers.
+1. In Cloudflare, use **Add a domain**, enter `askingcompany.com` and choose the Free plan. Cloudflare shows you two nameservers.
 2. In GoDaddy, go to **My Products → the domain → DNS → Nameservers → Change → "I'll use my own nameservers"** and paste Cloudflare's two.
    This takes anywhere from minutes to a few hours.
 3. Then add the custom domain to the Worker (step 1.4 above).
@@ -99,7 +99,7 @@ The domain stays registered (and billed) at GoDaddy. Only the DNS moves.
    - Statement descriptor: `ASKINGCOMPANY`.
 2. **API key.** In **Developers → API keys**, create a restricted key with write access to *Checkout Sessions* only, or use the secret key.
 3. **Webhook.** In **Developers → Webhooks → Add endpoint**:
-   - URL: `https://theaskingcompany.com/api/webhook`
+   - URL: `https://askingcompany.com/api/webhook`
    - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`, `charge.dispute.created`
    - Copy the signing secret (`whsec_…`).
 4. **Secrets.** Open the Worker → **Settings → Variables and Secrets** and add `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` as *secrets*.
