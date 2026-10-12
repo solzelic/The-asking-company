@@ -1,6 +1,7 @@
 import rss from '@astrojs/rss';
 import { getBooks } from '../lib/library.js';
 import { SITE } from '../site.config.js';
+import { marked } from 'marked';
 
 export async function GET(context){
   const books = (await getBooks()).reverse();
@@ -14,6 +15,7 @@ export async function GET(context){
       pubDate: b.date,
       link: b.href,
       categories: b.tags,
+      content: marked.parse(b.entry.body || ''),
     })),
   });
 }

@@ -1,0 +1,17 @@
+---
+import Company from '../layouts/Company.astro';
+---
+<Company title="Not found — Asking Company" description="This page does not exist." page="legal" closer={false}>
+  <meta name="robots" content="noindex" slot="head" />
+  <div class="note" style="text-align:center">
+    <span class="corner tr">404</span><span class="corner bl">404</span>
+    <span class="eyebrow">Notice of absence</span>
+    <h2 style="font-size:clamp(32px,6.4vw,54px)">This page does not exist.</h2>
+    <p class="dim narrow" style="margin:0 auto 10px">Neither, in several jurisdictions, does the company. We have checked the filing cabinet, the other filing cabinet, and the founder. Nothing was found.</p>
+    <p class="tiny">If something used to be here, it has been shelved. If it never was, this is the correct page.</p>
+    <div style="margin-top:30px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <a class="btn sm" href="/" style="text-decoration:none;width:auto">Back to the ask</a>
+      <a class="btn sm ghost" href="/writing" style="text-decoration:none;width:auto">The Library</a>
+    </div>
+  </div>
+</Company>

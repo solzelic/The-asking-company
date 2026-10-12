@@ -316,6 +316,9 @@ addEventListener('keydown', e => { if (e.key === 'Escape') deselect(); });
    book comes toward you until its page is the whole screen — and that
    page is the essay's paper, so the essay simply appears on it. */
 const cssPx = (el, v) => parseFloat(getComputedStyle(el).getPropertyValue(v)) || 0;
+/* How big the book stands when it faces you: 46% of the screen height,
+   at most 380px, and never wider than 82% of the screen (phones). */
+const coverScale = h => Math.min(innerHeight * .46, 380, innerWidth * .82 / .68) / h;
 let opening = false;
 function open(b, e){
   e.preventDefault();
@@ -342,7 +345,7 @@ function open(b, e){
 
   const inner = fly.querySelector('.bk-3d'), cover = fly.querySelector('.bk-cover'), inside = fly.querySelector('.bk-inside');
   const T = { lift: 560, open: 520, zoom: 520 };                       // the three beats
-  const S = Math.min(innerHeight * .46, 380) / h;                       // cover height on screen
+  const S = coverScale(h);                                              // cover size on screen
   const cx = innerWidth / 2 - (r.left + w / 2), cy = innerHeight / 2 - (r.top + h / 2);
   const ease = 'cubic-bezier(.25,.8,.25,1)';
 
@@ -460,7 +463,7 @@ function landBook(){
   let y1 = y0;
   if (r0.top < 90 || r0.bottom > innerHeight - 40) y1 = Math.max(0, Math.min(maxY, slotDocTop - innerHeight * .55 + h / 2));
   const r = { left: r0.left, top: slotDocTop - y1 };                      // the slot, where it will be when we arrive
-  const S = Math.min(innerHeight * .46, 380) / h;
+  const S = coverScale(h);
   const wrap = document.createElement('div');
   wrap.className = 'flywrap';
   Object.assign(wrap.style, { left: (innerWidth / 2 - w / 2) + 'px', top: (innerHeight / 2 - h / 2) + 'px', width: w + 'px', height: h + 'px' });

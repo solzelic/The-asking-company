@@ -10,6 +10,8 @@ export const SITE = {
   description:
     'I am not sick. I am not poor. Nothing is wrong. I want one dollar. From you. From everyone. That is the entire company.',
   goal: 1_000_000_000,
+  // Cloudflare Web Analytics token (dashboard → Analytics & Logs → Web Analytics). '' = off.
+  analyticsToken: '',
 };
 
 /* One spot ink per page — the only colour that moves. */

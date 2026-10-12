@@ -32,7 +32,8 @@ Write here. ## Headings, > pull quotes, *italics*, footnotes[^1], --- for a sect
 
 The rest is automatic: the spine's thickness follows the word count, and the book appears on its shelf, the home page, the RSS feed, the sitemap, and in the filters.
 
-- **Shelves** live in `src/data/series.js`. Add a new one there.
+- **Shelves** live in `src/data/series.js`. Add a new one there. A shelf only appears once it holds a written volume; planned titles on an empty shelf wait with it.
+- **Link previews.** Every essay gets its own preview image (`/og/<slug>.png`), drawn on the edge from the book's cover by `functions/og/[slug].js`. Nothing to do per essay.
 - **Unwritten books** (dashed outlines) are the `PLANNED` list in the same file. Delete an entry once the real piece exists.
 
 ## Reading features
@@ -120,6 +121,10 @@ Test first with `sk_test_…` keys and card `4242 4242 4242 4242`. Then switch t
 3. Stripe takes the payment (cards, Apple Pay, Google Pay) and returns to `/thanks?session_id=…`.
 4. `/thanks` asks `/api/session`, which confirms with Stripe directly, records the gift, and returns the giver number. The page draws the certificate, which can be downloaded as a PNG.
 5. The webhook records the same gift independently (idempotent, so it is never counted twice) and marks refunds and disputes so they leave the total.
+
+## Analytics
+
+Cloudflare Web Analytics is free and uses no cookies. In the dashboard go to **Analytics & Logs → Web Analytics → Add a site**, copy the token, and put it in `analyticsToken` in `src/site.config.js`. Leave it empty to run with no analytics at all.
 
 ## Running the ledger
 

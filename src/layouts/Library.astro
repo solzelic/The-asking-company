@@ -10,15 +10,16 @@ interface Props {
   description?: string;
   tone?: 'dark' | 'light';
   image?: string;
+  imageAlt?: string;
   type?: 'website' | 'article';
   published?: string;
   accent?: string;
   progress?: boolean;
 }
-const { title, description, tone = 'dark', image, type, published, accent, progress = false } = Astro.props;
+const { title, description, tone = 'dark', image, imageAlt, type, published, accent, progress = false } = Astro.props;
 const onIndex = Astro.url.pathname.replace(/(\.html|\/)$/, '') === '/writing';
 ---
-<Base title={title} description={description} image={image} type={type} published={published}
+<Base title={title} description={description} image={image} imageAlt={imageAlt} type={type} published={published}
       themeColor={tone === 'dark' ? '#14110c' : '#f7f4ec'}>
 <slot name="head" slot="head" />
 <body class={tone} style={accent ? `--accent:${accent}` : undefined}>

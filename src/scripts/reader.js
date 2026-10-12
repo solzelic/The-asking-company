@@ -130,7 +130,7 @@ function savePos(p){
   let p = 0; try { p = +localStorage.getItem('ac-pos:' + slug) || 0; } catch {}
   if (p < .06 || scrollY > 100 || location.hash) return;
   const t = $('toast');
-  t.querySelector('.msg').textContent = 'You were ' + Math.round(p * 100) + '% of the way through.';
+  t.querySelector('.msg').textContent = 'You stopped ' + Math.round(p * 100) + '% of the way through.';
   t.classList.add('on');
   const hide = () => t.classList.remove('on');
   t.querySelector('.go').addEventListener('click', () => {
@@ -218,6 +218,9 @@ else {
    closes, and the closed book is handed to the shelf page, which lands
    it in its slot. Any link to the Library, or Escape, does this. */
 const cssPx = (el, v) => parseFloat(getComputedStyle(el).getPropertyValue(v)) || 0;
+/* How big the book stands when it faces you: 46% of the screen height,
+   at most 380px, and never wider than 82% of the screen (phones). */
+const coverScale = h => Math.min(innerHeight * .46, 380, innerWidth * .82 / .68) / h;
 let leaving = false;
 function handOff(){ try { sessionStorage.setItem('ac-return', JSON.stringify({ slug, t: Date.now() })); } catch {} }
 addEventListener('pagehide', handOff);
@@ -234,7 +237,7 @@ function putBack(href){
   const src = document.querySelector('#putback .bk');
   if (reduced || !src){ location.href = href; return; }
   const w = cssPx(src, '--w'), h = cssPx(src, '--h'), d = cssPx(src, '--d');
-  const S = Math.min(innerHeight * .46, 380) / h;
+  const S = coverScale(h);
   const wrap = document.createElement('div');
   wrap.className = 'flywrap';
   Object.assign(wrap.style, { left: (innerWidth / 2 - w / 2) + 'px', top: (innerHeight / 2 - h / 2) + 'px', width: w + 'px', height: h + 'px' });

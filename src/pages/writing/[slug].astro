@@ -22,7 +22,8 @@ const lum = (hex) => { const n = parseInt(hex.replace('#', '').padEnd(6, '0'), 1
 const accent = lum(b.spine) < 0.55 ? b.spine : '#0f766e';
 ---
 <Library title={`${b.title.replace(/\.$/, '')} — Asking Company`} description={b.dek} tone="light"
-  type="article" published={b.date.toISOString()} accent={accent} progress>
+  type="article" published={b.date.toISOString()} accent={accent} progress image={`/og/${b.slug}.png`}
+  imageAlt={`${b.title} — a book from the Library of Asking Company`}>
   <Fragment slot="head">
     <link rel="prefetch" href="/writing">
     <script is:inline>
