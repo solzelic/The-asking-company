@@ -17,9 +17,18 @@ const ROUTES = [
   ['GET',  /^\/og\/([A-Za-z0-9_-]+)(?:\.png)?$/, og.onRequestGet, 'slug'],
 ];
 
+/* One address. The other domain, the www forms and workers.dev all send
+   people here, permanently, keeping the path and query. */
+const CANONICAL = 'askingcompany.com';
+const isLocal = h => h === 'localhost' || h === '127.0.0.1' || h.endsWith('.localhost');
+
 export default {
   async fetch(request, env, ctx){
     const url = new URL(request.url);
+    if (url.hostname !== CANONICAL && !isLocal(url.hostname)){
+      url.hostname = CANONICAL; url.protocol = 'https:'; url.port = '';
+      return Response.redirect(url.toString(), 301);
+    }
     for (const [method, re, handler, param] of ROUTES){
       const m = url.pathname.match(re);
       if (!m) continue;

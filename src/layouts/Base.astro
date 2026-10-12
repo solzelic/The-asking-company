@@ -52,6 +52,12 @@ const imageUrl = new URL(image, SITE.url).href;
 <meta name="twitter:title" content={title}>
 <meta name="twitter:description" content={description}>
 <meta name="twitter:image" content={imageUrl}>
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org', '@type': 'Organization',
+  name: 'Asking Company', alternateName: ['The Asking Company', 'theaskingcompany'],
+  url: SITE.url, logo: new URL('/favicon.svg', SITE.url).href, email: SITE.email,
+  address: { '@type': 'PostalAddress', addressLocality: 'Toronto', addressRegion: 'ON', addressCountry: 'CA' },
+})} />
 <slot name="head" />
 {SITE.analyticsToken && <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={`{"token": "${SITE.analyticsToken}"}`}></script>}
 </head>
